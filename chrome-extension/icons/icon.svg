@@ -1,10 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#1e3c72"/>
       <stop offset="100%" style="stop-color:#2a5298"/>
     </linearGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a6fa5"/>
+      <stop offset="100%" style="stop-color:#2a5298"/>
+    </linearGradient>
   </defs>
-  <rect width="128" height="128" rx="20" fill="url(#grad)"/>
-  <text x="64" y="85" font-size="60" text-anchor="middle" fill="white">🛠️</text>
+  
+  <!-- 圆角背景 -->
+  <rect width="128" height="128" rx="24" fill="url(#bg)"/>
+  
+  <!-- 高光效果 -->
+  <rect x="4" y="4" width="60" height="60" rx="20" fill="url(#shine)" opacity="0.3"/>
+  
+  <!-- 扳手图标 - 更醒目的设计 -->
+  <g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 扳手头 - 七边形开口 -->
+    <path d="M40 40 L35 35 A20 20 0 1 1 55 55 L50 50" stroke-width="10"/>
+    
+    <!-- 扳手柄 -->
+    <line x1="50" y1="50" x2="85" y2="85" stroke-width="12"/>
+    
+    <!-- 扳手尾 -->
+    <path d="M85 85 A15 15 0 1 0 100 100" stroke-width="10"/>
+    
+    <!-- 内圈装饰 -->
+    <circle cx="40" cy="40" r="8" stroke-width="4"/>
+  </g>
+  
+  <!-- 装饰点 -->
+  <circle cx="100" cy="28" r="4" fill="#ffffff" opacity="0.6"/>
+  <circle cx="110" cy="38" r="2" fill="#ffffff" opacity="0.4"/>
 </svg>

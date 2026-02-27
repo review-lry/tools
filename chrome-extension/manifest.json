@@ -3,8 +3,18 @@
   "name": "🛠️ 开发者工具箱",
   "version": "1.0.0",
   "description": "常用开发工具集合 - JSON格式化、时间戳转换、Base64编解码、获取页面数据等",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "action": {
     "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
     "default_title": "开发者工具箱 (Ctrl+Shift+D)"
   },
   "permissions": [
