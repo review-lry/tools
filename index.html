@@ -270,8 +270,22 @@
                 <h2><span class="icon">📅</span> 日期转时间戳</h2>
                 
                 <div class="input-group">
+                    <label>输入模式</label>
+                    <select id="datetimeMode" onchange="toggleDatetimeMode()">
+                        <option value="picker">选择日期时间</option>
+                        <option value="manual">手动输入</option>
+                    </select>
+                </div>
+                
+                <div class="input-group" id="datetimePickerGroup">
                     <label>选择日期时间</label>
                     <input type="datetime-local" id="datetimeInput">
+                </div>
+                
+                <div class="input-group" id="datetimeManualGroup" style="display: none;">
+                    <label>手动输入日期时间</label>
+                    <input type="text" id="datetimeManualInput" placeholder="例如: 2024-01-01 12:00:00 或 2024/01/01 12:00">
+                    <small style="color: #666; margin-top: 5px; display: block;">支持格式: YYYY-MM-DD HH:mm:ss, YYYY/MM/DD HH:mm, 等</small>
                 </div>
                 
                 <button class="btn" onclick="convertToTimestamp()">转换为时间戳</button>
@@ -544,7 +558,109 @@
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('datetimeInput').value = now.toISOString().slice(0, 16);
+            document.getElementById('datetimeManualInput').value = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }).replace(/\//g, '-');
             convertToTimestamp();
+        }
+
+        // 切换日期输入模式
+        function toggleDatetimeMode() {
+            const mode = document.getElementById('datetimeMode').value;
+            const pickerGroup = document.getElementById('datetimePickerGroup');
+            const manualGroup = document.getElementById('datetimeManualGroup');
+            
+            if (mode === 'picker') {
+                pickerGroup.style.display = 'block';
+                manualGroup.style.display = 'none';
+            } else {
+                pickerGroup.style.display = 'none';
+                manualGroup.style.display = 'block';
+            }
+        }
+
+        // 日期转时间戳（支持手动输入）
+        function convertToTimestamp() {
+            const mode = document.getElementById('datetimeMode').value;
+            let date;
+            
+            if (mode === 'picker') {
+                const input = document.getElementById('datetimeInput').value;
+                if (!input) {
+                    showResult('datetimeResult', '请选择日期时间');
+                    return;
+                }
+                date = new Date(input);
+            } else {
+                const input = document.getElementById('datetimeManualInput').value.trim();
+                if (!input) {
+                    showResult('datetimeResult', '请输入日期时间');
+                    return;
+                }
+                
+                // 尝试解析多种格式
+                date = parseManualDatetime(input);
+                
+                if (!date || isNaN(date.getTime())) {
+                    showResult('datetimeResult', '<span style="color: red;">无法解析日期，请检查格式<br>支持: 2024-01-01 12:00:00, 2024/01/01 12:00, 2024-01-01T12:00:00 等</span>');
+                    return;
+                }
+            }
+
+            const result = `
+                <strong>时间戳(秒):</strong> ${Math.floor(date.getTime() / 1000)}<br>
+                <strong>时间戳(毫秒):</strong> ${date.getTime()}<br>
+                <strong>日期:</strong> ${date.toLocaleString('zh-CN')}<br>
+                <strong>UTC:</strong> ${date.toISOString()}
+            `;
+            showResult('datetimeResult', result);
+        }
+
+        // 解析手动输入的日期时间
+        function parseManualDatetime(input) {
+            // 尝试多种常见格式
+            const formats = [
+                // ISO 格式
+                /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/,
+                /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/,
+                // 常规格式
+                /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
+                /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/,
+                /^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}$/,
+                /^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/,
+                // 中文格式
+                /^\d{4}年\d{1,2}月\d{1,2}日 \d{1,2}:\d{2}:\d{2}$/,
+                /^\d{4}年\d{1,2}月\d{1,2}日 \d{1,2}:\d{2}$/,
+                // 仅日期
+                /^\d{4}-\d{2}-\d{2}$/,
+                /^\d{4}\/\d{2}\/\d{2}$/,
+            ];
+
+            // 替换中文符号
+            let normalized = input
+                .replace(/年/g, '-')
+                .replace(/月/g, '-')
+                .replace(/日/g, ' ')
+                .replace(/\//g, '-');
+
+            // 直接尝试解析
+            let date = new Date(normalized);
+            if (!isNaN(date.getTime())) {
+                return date;
+            }
+
+            // 尝试直接用原始输入
+            date = new Date(input);
+            if (!isNaN(date.getTime())) {
+                return date;
+            }
+
+            return null;
         }
 
         // JSON 格式化
