@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "🛠️ 开发者工具箱",
+  "version": "1.0.0",
+  "description": "常用开发工具集合 - JSON格式化、时间戳转换、Base64编解码、获取页面数据等",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "开发者工具箱 (Ctrl+Shift+D)"
+  },
+  "permissions": [
+    "activeTab",
+    "clipboardWrite",
+    "clipboardRead",
+    "storage",
+    "scripting"
+  ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+D",
+        "mac": "Command+Shift+D"
+      },
+      "description": "打开开发者工具箱"
+    }
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}
