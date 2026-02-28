@@ -6,49 +6,53 @@
     <title>开发者工具箱</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 400px; min-height: 520px; background: #f5f7fa; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 420px; min-height: 550px; background: #f5f7fa; }
         .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 12px 15px; }
         .header h1 { font-size: 15px; font-weight: 600; }
         .header p { font-size: 11px; opacity: 0.8; margin-top: 2px; }
-        .tabs { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px; background: white; border-bottom: 1px solid #e0e0e0; }
-        .tab { padding: 5px 10px; border: none; background: #f0f0f0; border-radius: 4px; cursor: pointer; font-size: 11px; transition: all 0.2s; }
+        .tabs { display: flex; flex-wrap: wrap; gap: 3px; padding: 6px; background: white; border-bottom: 1px solid #e0e0e0; }
+        .tab { padding: 4px 8px; border: none; background: #f0f0f0; border-radius: 4px; cursor: pointer; font-size: 10px; transition: all 0.2s; }
         .tab:hover { background: #e0e0e0; }
         .tab.active { background: #1e3c72; color: white; }
-        .content { padding: 10px; display: none; }
+        .content { padding: 8px; display: none; max-height: 400px; overflow-y: auto; }
         .content.active { display: block; }
-        .card { background: white; border-radius: 8px; padding: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .card h3 { font-size: 12px; color: #1e3c72; margin-bottom: 8px; }
-        .input-group { margin-bottom: 8px; }
-        .input-group label { display: block; font-size: 10px; color: #666; margin-bottom: 3px; }
-        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 11px; font-family: Monaco, Consolas, monospace; }
-        .input-group textarea { min-height: 50px; resize: vertical; }
-        .btn { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; margin-right: 4px; margin-bottom: 4px; }
+        .card { background: white; border-radius: 8px; padding: 10px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .card h3 { font-size: 11px; color: #1e3c72; margin-bottom: 6px; }
+        .input-group { margin-bottom: 6px; }
+        .input-group label { display: block; font-size: 9px; color: #666; margin-bottom: 2px; }
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 5px 7px; border: 1px solid #ddd; border-radius: 4px; font-size: 10px; font-family: Monaco, Consolas, monospace; }
+        .input-group textarea { min-height: 45px; resize: vertical; }
+        .btn { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; margin-right: 3px; margin-bottom: 3px; }
         .btn:hover { opacity: 0.9; }
         .btn-secondary { background: #6c757d; }
         .btn-success { background: #28a745; }
         .btn-warning { background: #fd7e14; }
-        .result { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px; margin-top: 8px; font-size: 10px; max-height: 120px; overflow-y: auto; font-family: Monaco, Consolas, monospace; word-break: break-all; }
+        .btn-danger { background: #dc3545; }
+        .result { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 4px; padding: 6px; margin-top: 6px; font-size: 9px; max-height: 100px; overflow-y: auto; font-family: Monaco, Consolas, monospace; word-break: break-all; }
+        .result-lg { max-height: 150px; }
         .result .error { color: #dc3545; }
-        .row { display: flex; gap: 6px; }
+        .row { display: flex; gap: 5px; }
         .col { flex: 1; }
-        .checkbox-group { display: flex; flex-wrap: wrap; gap: 6px; font-size: 10px; margin: 5px 0; }
-        .checkbox-group label { display: flex; align-items: center; gap: 3px; cursor: pointer; }
-        .quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 8px; background: white; margin-bottom: 8px; }
-        .quick-btn { padding: 8px; border: 1px solid #e0e0e0; background: #f8f9fa; border-radius: 6px; cursor: pointer; font-size: 10px; text-align: center; transition: all 0.2s; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 5px; font-size: 9px; margin: 4px 0; }
+        .checkbox-group label { display: flex; align-items: center; gap: 2px; cursor: pointer; }
+        .quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 6px; background: white; margin-bottom: 6px; }
+        .quick-btn { padding: 6px; border: 1px solid #e0e0e0; background: #f8f9fa; border-radius: 6px; cursor: pointer; font-size: 9px; text-align: center; transition: all 0.2s; }
         .quick-btn:hover { background: #e9ecef; border-color: #1e3c72; }
-        .quick-btn .icon { font-size: 16px; display: block; margin-bottom: 2px; }
-        .time-display { font-size: 18px; font-weight: bold; color: #1e3c72; text-align: center; padding: 10px 0; }
-        .time-display small { font-size: 11px; color: #666; font-weight: normal; display: block; margin-top: 3px; }
-        .footer { padding: 8px; text-align: center; font-size: 9px; color: #999; background: white; border-top: 1px solid #e0e0e0; }
-        .qr-container { text-align: center; padding: 10px; }
-        .qr-container img { max-width: 150px; border-radius: 8px; }
-        .color-preview { width: 30px; height: 30px; border-radius: 4px; border: 1px solid #ddd; display: inline-block; vertical-align: middle; margin-left: 10px; }
+        .quick-btn .icon { font-size: 14px; display: block; margin-bottom: 1px; }
+        .time-display { font-size: 16px; font-weight: bold; color: #1e3c72; text-align: center; padding: 8px 0; }
+        .time-display small { font-size: 10px; color: #666; font-weight: normal; display: block; margin-top: 2px; }
+        .footer { padding: 6px; text-align: center; font-size: 8px; color: #999; background: white; border-top: 1px solid #e0e0e0; }
+        .qr-container { text-align: center; padding: 8px; }
+        .qr-container img { max-width: 120px; border-radius: 8px; }
+        .color-preview { width: 25px; height: 25px; border-radius: 4px; border: 1px solid #ddd; display: inline-block; vertical-align: middle; margin-left: 8px; }
+        .badge { display: inline-block; padding: 2px 6px; border-radius: 10px; font-size: 8px; margin-left: 5px; }
+        .badge-new { background: #28a745; color: white; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>🛠️ 开发者工具箱</h1>
-        <p>快速处理JSON、时间戳、Base64、二维码等</p>
+        <p>JSON/时间戳/Base64/二维码等开发工具</p>
     </div>
 
     <div class="quick">
@@ -56,16 +60,22 @@
         <div class="quick-btn" id="btn-copy"><span class="icon">📋</span>复制</div>
         <div class="quick-btn" id="btn-timestamp"><span class="icon">🕐</span>时间戳</div>
         <div class="quick-btn" id="btn-uuid"><span class="icon">🆔</span>UUID</div>
+        <div class="quick-btn" id="btn-current-qr"><span class="icon">📱</span>当前二维码<span class="badge badge-new">NEW</span></div>
+        <div class="quick-btn" id="btn-short-url"><span class="icon">🔗</span>短链接<span class="badge badge-new">NEW</span></div>
+        <div class="quick-btn" id="btn-json-path"><span class="icon">🔍</span>JSONPath<span class="badge badge-new">NEW</span></div>
+        <div class="quick-btn" id="btn-diff"><span class="icon">📊</span>文本对比<span class="badge badge-new">NEW</span></div>
     </div>
 
     <div class="tabs">
-        <button class="tab active" data-tab="time">🕐 时间</button>
-        <button class="tab" data-tab="encode">🔐 编解码</button>
-        <button class="tab" data-tab="json">📝 JSON</button>
-        <button class="tab" data-tab="text">📄 文本</button>
-        <button class="tab" data-tab="gen">🎲 生成</button>
-        <button class="tab" data-tab="conv">🔄 转换</button>
-        <button class="tab" data-tab="hash">🔒 哈希</button>
+        <button class="tab active" data-tab="time">🕐时间</button>
+        <button class="tab" data-tab="encode">🔐编码</button>
+        <button class="tab" data-tab="json">📝JSON</button>
+        <button class="tab" data-tab="text">📄文本</button>
+        <button class="tab" data-tab="gen">🎲生成</button>
+        <button class="tab" data-tab="qr">📱二维码<span class="badge badge-new">NEW</span></button>
+        <button class="tab" data-tab="net">🌐网络<span class="badge badge-new">NEW</span></button>
+        <button class="tab" data-tab="conv">🔄转换</button>
+        <button class="tab" data-tab="hash">🔒哈希</button>
     </div>
 
     <div id="tab-time" class="content active">
@@ -86,6 +96,15 @@
             <div class="input-group"><input type="text" id="dateIn" placeholder="2024-01-01 12:00:00"></div>
             <button class="btn" id="btn-date-convert">转换</button>
             <div class="result" id="dateOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>⏱️ 时间差计算<span class="badge badge-new">NEW</span></h3>
+            <div class="row">
+                <div class="col"><input type="datetime-local" id="timeStart"></div>
+                <div class="col"><input type="datetime-local" id="timeEnd"></div>
+            </div>
+            <button class="btn" id="btn-time-diff">计算</button>
+            <div class="result" id="timeDiffOut">结果</div>
         </div>
     </div>
 
@@ -122,22 +141,37 @@
             <button class="btn" id="btn-num-conv">转换</button>
             <div class="result" id="numOut">结果</div>
         </div>
+        <div class="card">
+            <h3>🔤 Unicode<span class="badge badge-new">NEW</span></h3>
+            <div class="input-group"><textarea id="unicodeIn" placeholder="输入文本或 \\uXXXX"></textarea></div>
+            <button class="btn" id="btn-unicode-enc">编码</button>
+            <button class="btn btn-secondary" id="btn-unicode-dec">解码</button>
+            <div class="result" id="unicodeOut">结果</div>
+        </div>
     </div>
 
     <div id="tab-json" class="content">
         <div class="card">
             <h3>📝 JSON格式化</h3>
-            <div class="input-group"><textarea id="jsonIn" placeholder='{"name":"test"}' style="min-height:70px;"></textarea></div>
+            <div class="input-group"><textarea id="jsonIn" placeholder='{"name":"test"}' style="min-height:60px;"></textarea></div>
             <button class="btn" id="btn-json-fmt">格式化</button>
             <button class="btn btn-secondary" id="btn-json-min">压缩</button>
             <button class="btn btn-success" id="btn-json-copy">复制</button>
+            <button class="btn btn-warning" id="btn-json-validate">校验</button>
             <div class="result" id="jsonOut">结果</div>
         </div>
         <div class="card">
             <h3>🎫 JWT解析</h3>
             <div class="input-group"><textarea id="jwtIn" placeholder="粘贴JWT Token"></textarea></div>
             <button class="btn" id="btn-jwt">解析</button>
-            <div class="result" id="jwtOut">结果</div>
+            <div class="result result-lg" id="jwtOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔍 JSONPath查询<span class="badge badge-new">NEW</span></h3>
+            <div class="input-group"><textarea id="jsonPathData" placeholder='{"store":{"book":[{"title":"A"},{"title":"B"}]}}' style="min-height:40px;"></textarea></div>
+            <div class="input-group"><input type="text" id="jsonPathExpr" placeholder="$.store.book[*].title"></div>
+            <button class="btn" id="btn-json-path-query">查询</button>
+            <div class="result" id="jsonPathOut">结果</div>
         </div>
     </div>
 
@@ -153,8 +187,9 @@
             <div class="input-group"><textarea id="caseIn" placeholder="输入文本"></textarea></div>
             <button class="btn" id="btn-upper">大写</button>
             <button class="btn btn-secondary" id="btn-lower">小写</button>
-            <button class="btn btn-warning" id="btn-cap">首字母大写</button>
+            <button class="btn btn-warning" id="btn-cap">首字母</button>
             <button class="btn btn-secondary" id="btn-camel">驼峰</button>
+            <button class="btn btn-secondary" id="btn-snake">蛇形<span class="badge badge-new">NEW</span></button>
             <div class="result" id="caseOut">结果</div>
         </div>
         <div class="card">
@@ -163,6 +198,7 @@
             <button class="btn" id="btn-sort">排序</button>
             <button class="btn btn-secondary" id="btn-uniq">去重</button>
             <button class="btn btn-warning" id="btn-reverse">倒序</button>
+            <button class="btn btn-secondary" id="btn-shuffle">随机<span class="badge badge-new">NEW</span></button>
             <div class="result" id="sortOut">结果</div>
         </div>
         <div class="card">
@@ -177,13 +213,22 @@
             <button class="btn" id="btn-regex">测试</button>
             <div class="result" id="regexOut">结果</div>
         </div>
+        <div class="card">
+            <h3>📊 文本对比<span class="badge badge-new">NEW</span></h3>
+            <div class="row">
+                <div class="col"><textarea id="diffLeft" placeholder="文本A" style="min-height:60px;"></textarea></div>
+                <div class="col"><textarea id="diffRight" placeholder="文本B" style="min-height:60px;"></textarea></div>
+            </div>
+            <button class="btn" id="btn-diff">对比</button>
+            <div class="result result-lg" id="diffOut">结果</div>
+        </div>
     </div>
 
     <div id="tab-gen" class="content">
         <div class="card">
             <h3>🆔 UUID</h3>
             <div class="row">
-                <div class="col"><div class="input-group"><input type="number" id="uuidN" value="1" min="1" max="10"></div></div>
+                <div class="col"><input type="number" id="uuidN" value="1" min="1" max="10"></div>
                 <div class="col"><button class="btn" id="btn-uuid-gen">生成</button></div>
             </div>
             <div class="result" id="uuidOut">结果</div>
@@ -202,23 +247,76 @@
             <div class="result" id="pwdOut">结果</div>
         </div>
         <div class="card">
-            <h3>📱 二维码生成</h3>
-            <div class="input-group"><input type="text" id="qrIn" placeholder="输入URL或文本"></div>
+            <h3>📝 Lorem生成</h3>
             <div class="row">
-                <div class="col"><input type="number" id="qrSize" value="150" min="50" max="300"></div>
+                <div class="col"><input type="number" id="loremN" value="3" min="1" max="20"></div>
+                <div class="col"><select id="loremType"><option value="para">段落</option><option value="sent">句子</option><option value="word">单词</option></select></div>
+            </div>
+            <button class="btn" id="btn-lorem">生成</button>
+            <div class="result" id="loremOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📋 条形码生成<span class="badge badge-new">NEW</span></h3>
+            <div class="input-group"><input type="text" id="barcodeIn" placeholder="输入数字或文本"></div>
+            <div class="input-group"><select id="barcodeType"><option value="code128">Code 128</option><option value="ean13">EAN-13</option><option value="upc">UPC</option></select></div>
+            <button class="btn" id="btn-barcode">生成</button>
+            <div class="result qr-container" id="barcodeOut">结果</div>
+        </div>
+    </div>
+
+    <div id="tab-qr" class="content">
+        <div class="card">
+            <h3>📱 二维码生成</h3>
+            <div class="input-group"><textarea id="qrIn" placeholder="输入URL或文本"></textarea></div>
+            <div class="row">
+                <div class="col"><input type="number" id="qrSize" value="150" min="50" max="300" placeholder="尺寸"></div>
+                <div class="col"><select id="qrColor"><option value="000000">黑色</option><option value="1e3c72">蓝色</option><option value="28a745">绿色</option><option value="dc3545">红色</option></select></div>
             </div>
             <button class="btn" id="btn-qr">生成</button>
             <button class="btn btn-success" id="btn-qr-download">下载</button>
             <div class="result qr-container" id="qrOut">结果</div>
         </div>
         <div class="card">
-            <h3>📝 Lorem生成</h3>
-            <div class="row">
-                <div class="col"><div class="input-group"><input type="number" id="loremN" value="3" min="1" max="20"></div></div>
-                <div class="col"><select id="loremType"><option value="para">段落</option><option value="sent">句子</option><option value="word">单词</option></select></div>
-            </div>
-            <button class="btn" id="btn-lorem">生成</button>
-            <div class="result" id="loremOut">结果</div>
+            <h3>🔗 当前页面二维码<span class="badge badge-new">NEW</span></h3>
+            <p style="font-size:9px;color:#666;margin-bottom:6px;">一键生成当前浏览器标签页URL的二维码</p>
+            <button class="btn" id="btn-current-page-qr">生成当前页面二维码</button>
+            <div class="result qr-container" id="currentQrOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📷 二维码解析<span class="badge badge-new">NEW</span></h3>
+            <div class="input-group"><input type="text" id="qrDecodeIn" placeholder="输入二维码图片URL或粘贴图片"></div>
+            <p style="font-size:8px;color:#999;margin-top:4px;">提示：可直接粘贴包含二维码的URL</p>
+            <button class="btn" id="btn-qr-decode">解析</button>
+            <div class="result" id="qrDecodeOut">结果</div>
+        </div>
+    </div>
+
+    <div id="tab-net" class="content">
+        <div class="card">
+            <h3>🔗 URL解析<span class="badge badge-new">NEW</span></h3>
+            <div class="input-group"><input type="text" id="urlParseIn" placeholder="输入完整URL"></div>
+            <button class="btn" id="btn-url-parse">解析</button>
+            <div class="result result-lg" id="urlParseOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🌐 IP地址查询<span class="badge badge-new">NEW</span></h3>
+            <div class="input-group"><input type="text" id="ipQueryIn" placeholder="输入IP地址（留空查本机IP）"></div>
+            <button class="btn" id="btn-ip-query">查询</button>
+            <button class="btn btn-secondary" id="btn-my-ip">我的IP</button>
+            <div class="result" id="ipQueryOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📋 User-Agent解析<span class="badge badge-new">NEW</span></h3>
+            <div class="input-group"><textarea id="uaIn" placeholder="粘贴User-Agent字符串"></textarea></div>
+            <button class="btn" id="btn-ua-parse">解析</button>
+            <button class="btn btn-secondary" id="btn-ua-current">当前UA</button>
+            <div class="result" id="uaOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📡 HTTP状态码<span class="badge badge-new">NEW</span></h3>
+            <div class="input-group"><input type="number" id="httpCodeIn" placeholder="输入HTTP状态码" min="100" max="599"></div>
+            <button class="btn" id="btn-http-code">查询</button>
+            <div class="result" id="httpCodeOut">结果</div>
         </div>
     </div>
 
@@ -237,7 +335,7 @@
                 <div class="col"><select id="unitFrom"><option value="px">px</option><option value="rem">rem</option><option value="em">em</option></select></div>
                 <div class="col"><select id="unitTo"><option value="rem">rem</option><option value="px">px</option><option value="em">em</option></select></div>
             </div>
-            <div class="input-group" style="margin-top:5px;"><input type="number" id="baseSize" value="16" placeholder="基准字号(px)"></div>
+            <div class="input-group" style="margin-top:4px;"><input type="number" id="baseSize" value="16" placeholder="基准字号(px)"></div>
             <button class="btn" id="btn-unit">转换</button>
             <div class="result" id="unitOut">结果</div>
         </div>
@@ -247,6 +345,19 @@
             <button class="btn" id="btn-json-csv">JSON→CSV</button>
             <button class="btn btn-secondary" id="btn-csv-json">CSV→JSON</button>
             <div class="result" id="jsonCsvOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🖼️ 图片Base64<span class="badge badge-new">NEW</span></h3>
+            <div class="input-group"><input type="file" id="imgFile" accept="image/*"></div>
+            <button class="btn" id="btn-img-base64">转为Base64</button>
+            <div class="result result-lg" id="imgBase64Out">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔢 数字格式化<span class="badge badge-new">NEW</span></h3>
+            <div class="input-group"><input type="text" id="numFormatIn" placeholder="输入数字"></div>
+            <button class="btn" id="btn-num-format">格式化</button>
+            <button class="btn btn-secondary" id="btn-num-cn">转中文</button>
+            <div class="result" id="numFormatOut">结果</div>
         </div>
     </div>
 
@@ -262,7 +373,7 @@
     </div>
 
     <div class="footer">
-        🛠️ Dev Toolbox v1.3.0 | 按 Ctrl+Shift+D 快速打开
+        🛠️ Dev Toolbox v1.4.0 | Ctrl+Shift+D 快速打开
     </div>
 
     <script src="popup.js"></script>
