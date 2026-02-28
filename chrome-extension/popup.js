@@ -494,3 +494,52 @@ function generateUUID() {
     const hex = Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
     return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
 }
+// ===== 补充缺失的函数 =====
+
+function detectBrowser(ua) {
+    if (ua.includes('Chrome')) return 'Chrome';
+    if (ua.includes('Firefox')) return 'Firefox';
+    if (ua.includes('Edg')) return 'Edge';
+    if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+    if (ua.includes('Opera')) return 'Opera';
+    return 'Unknown';
+}
+
+function detectOS(ua) {
+    if (ua.includes('Win')) return 'Windows';
+    if (ua.includes('Mac')) return 'macOS';
+    if (ua.includes('Linux')) return 'Linux';
+    if (ua.includes('Android')) return 'Android';
+    if (ua.includes('iOS')) return 'iOS';
+    return 'Unknown';
+}
+
+function rgbToHsl(hex) {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+        s = l > 0.5 ? (max - l) / (1 - l) : (l - min) / max;
+        if (r === max) h = (g - b) / (max - min) / 6;
+        else if (g === max) h = 2 + (b - r) / (max - min) / 6;
+        else h = 4 + (r - g) / (max - min) / 6;
+    }
+    return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+}
+
+function calcTimeDiff() {
+    const startStr = getVal('timeStart');
+    const endStr = getVal('timeEnd');
+    if (!startStr || !endStr) return showResult('timeDiffOut', '<span class="error">请选择时间</span>');
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    const diff = end - start;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    showResult('timeDiffOut', `相差: ${days}天 ${hours}小时 ${minutes}分钟\n秒: ${seconds}\n总毫秒: ${diff}`);
+}
+
