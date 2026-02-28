@@ -6,7 +6,7 @@
     <title>开发者工具箱</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 380px; min-height: 500px; background: #f5f7fa; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 400px; min-height: 520px; background: #f5f7fa; }
         .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 12px 15px; }
         .header h1 { font-size: 15px; font-weight: 600; }
         .header p { font-size: 11px; opacity: 0.8; margin-top: 2px; }
@@ -26,32 +26,36 @@
         .btn:hover { opacity: 0.9; }
         .btn-secondary { background: #6c757d; }
         .btn-success { background: #28a745; }
-        .result { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px; margin-top: 8px; font-size: 10px; max-height: 100px; overflow-y: auto; font-family: Monaco, Consolas, monospace; word-break: break-all; }
+        .btn-warning { background: #fd7e14; }
+        .result { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px; margin-top: 8px; font-size: 10px; max-height: 120px; overflow-y: auto; font-family: Monaco, Consolas, monospace; word-break: break-all; }
         .result .error { color: #dc3545; }
         .row { display: flex; gap: 6px; }
         .col { flex: 1; }
         .checkbox-group { display: flex; flex-wrap: wrap; gap: 6px; font-size: 10px; margin: 5px 0; }
         .checkbox-group label { display: flex; align-items: center; gap: 3px; cursor: pointer; }
-        .quick { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; padding: 8px; background: white; margin-bottom: 8px; }
-        .quick-btn { padding: 10px; border: 1px solid #e0e0e0; background: #f8f9fa; border-radius: 6px; cursor: pointer; font-size: 10px; text-align: center; transition: all 0.2s; }
+        .quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 8px; background: white; margin-bottom: 8px; }
+        .quick-btn { padding: 8px; border: 1px solid #e0e0e0; background: #f8f9fa; border-radius: 6px; cursor: pointer; font-size: 10px; text-align: center; transition: all 0.2s; }
         .quick-btn:hover { background: #e9ecef; border-color: #1e3c72; }
-        .quick-btn .icon { font-size: 18px; display: block; margin-bottom: 3px; }
+        .quick-btn .icon { font-size: 16px; display: block; margin-bottom: 2px; }
         .time-display { font-size: 18px; font-weight: bold; color: #1e3c72; text-align: center; padding: 10px 0; }
         .time-display small { font-size: 11px; color: #666; font-weight: normal; display: block; margin-top: 3px; }
         .footer { padding: 8px; text-align: center; font-size: 9px; color: #999; background: white; border-top: 1px solid #e0e0e0; }
+        .qr-container { text-align: center; padding: 10px; }
+        .qr-container img { max-width: 150px; border-radius: 8px; }
+        .color-preview { width: 30px; height: 30px; border-radius: 4px; border: 1px solid #ddd; display: inline-block; vertical-align: middle; margin-left: 10px; }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>🛠️ 开发者工具箱</h1>
-        <p>快速处理JSON、时间戳、Base64等</p>
+        <p>快速处理JSON、时间戳、Base64、二维码等</p>
     </div>
 
     <div class="quick">
-        <div class="quick-btn" id="btn-format"><span class="icon">✨</span>智能格式化</div>
-        <div class="quick-btn" id="btn-copy"><span class="icon">📋</span>复制选中内容</div>
-        <div class="quick-btn" id="btn-timestamp"><span class="icon">🕐</span>当前时间戳</div>
-        <div class="quick-btn" id="btn-uuid"><span class="icon">🆔</span>生成UUID</div>
+        <div class="quick-btn" id="btn-format"><span class="icon">✨</span>格式化</div>
+        <div class="quick-btn" id="btn-copy"><span class="icon">📋</span>复制</div>
+        <div class="quick-btn" id="btn-timestamp"><span class="icon">🕐</span>时间戳</div>
+        <div class="quick-btn" id="btn-uuid"><span class="icon">🆔</span>UUID</div>
     </div>
 
     <div class="tabs">
@@ -60,6 +64,7 @@
         <button class="tab" data-tab="json">📝 JSON</button>
         <button class="tab" data-tab="text">📄 文本</button>
         <button class="tab" data-tab="gen">🎲 生成</button>
+        <button class="tab" data-tab="conv">🔄 转换</button>
         <button class="tab" data-tab="hash">🔒 哈希</button>
     </div>
 
@@ -73,6 +78,7 @@
             <div class="input-group"><input type="text" id="tsIn" placeholder="输入时间戳（秒/毫秒）"></div>
             <button class="btn" id="btn-ts-convert">转换</button>
             <button class="btn btn-secondary" id="btn-ts-now">当前</button>
+            <button class="btn btn-success" id="btn-ts-copy">复制</button>
             <div class="result" id="tsOut">结果</div>
         </div>
         <div class="card">
@@ -89,6 +95,7 @@
             <div class="input-group"><textarea id="b64In" placeholder="输入文本"></textarea></div>
             <button class="btn" id="btn-b64-enc">编码</button>
             <button class="btn btn-secondary" id="btn-b64-dec">解码</button>
+            <button class="btn btn-success" id="btn-b64-copy">复制</button>
             <div class="result" id="b64Out">结果</div>
         </div>
         <div class="card">
@@ -105,12 +112,22 @@
             <button class="btn btn-secondary" id="btn-html-dec">反转义</button>
             <div class="result" id="htmlOut">结果</div>
         </div>
+        <div class="card">
+            <h3>🔢 进制转换</h3>
+            <div class="input-group"><input type="text" id="numIn" placeholder="输入数字"></div>
+            <div class="row">
+                <div class="col"><select id="numFrom"><option value="10">十进制</option><option value="2">二进制</option><option value="8">八进制</option><option value="16">十六进制</option></select></div>
+                <div class="col"><select id="numTo"><option value="2">二进制</option><option value="8">八进制</option><option value="10">十进制</option><option value="16">十六进制</option></select></div>
+            </div>
+            <button class="btn" id="btn-num-conv">转换</button>
+            <div class="result" id="numOut">结果</div>
+        </div>
     </div>
 
     <div id="tab-json" class="content">
         <div class="card">
             <h3>📝 JSON格式化</h3>
-            <div class="input-group"><textarea id="jsonIn" placeholder='{"name":"test"}'></textarea></div>
+            <div class="input-group"><textarea id="jsonIn" placeholder='{"name":"test"}' style="min-height:70px;"></textarea></div>
             <button class="btn" id="btn-json-fmt">格式化</button>
             <button class="btn btn-secondary" id="btn-json-min">压缩</button>
             <button class="btn btn-success" id="btn-json-copy">复制</button>
@@ -136,7 +153,8 @@
             <div class="input-group"><textarea id="caseIn" placeholder="输入文本"></textarea></div>
             <button class="btn" id="btn-upper">大写</button>
             <button class="btn btn-secondary" id="btn-lower">小写</button>
-            <button class="btn btn-secondary" id="btn-cap">首字母</button>
+            <button class="btn btn-warning" id="btn-cap">首字母大写</button>
+            <button class="btn btn-secondary" id="btn-camel">驼峰</button>
             <div class="result" id="caseOut">结果</div>
         </div>
         <div class="card">
@@ -144,7 +162,20 @@
             <div class="input-group"><textarea id="sortIn" placeholder="每行一个"></textarea></div>
             <button class="btn" id="btn-sort">排序</button>
             <button class="btn btn-secondary" id="btn-uniq">去重</button>
+            <button class="btn btn-warning" id="btn-reverse">倒序</button>
             <div class="result" id="sortOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔍 正则测试</h3>
+            <div class="input-group"><input type="text" id="regexPattern" placeholder="正则表达式"></div>
+            <div class="input-group"><textarea id="regexText" placeholder="测试文本"></textarea></div>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="regexG"> g</label>
+                <label><input type="checkbox" id="regexI"> i</label>
+                <label><input type="checkbox" id="regexM"> m</label>
+            </div>
+            <button class="btn" id="btn-regex">测试</button>
+            <div class="result" id="regexOut">结果</div>
         </div>
     </div>
 
@@ -167,13 +198,55 @@
                 <label><input type="checkbox" id="c4" checked> 特殊</label>
             </div>
             <button class="btn" id="btn-pwd">生成</button>
+            <button class="btn btn-success" id="btn-pwd-copy">复制</button>
             <div class="result" id="pwdOut">结果</div>
         </div>
         <div class="card">
-            <h3>📱 二维码</h3>
+            <h3>📱 二维码生成</h3>
             <div class="input-group"><input type="text" id="qrIn" placeholder="输入URL或文本"></div>
+            <div class="row">
+                <div class="col"><input type="number" id="qrSize" value="150" min="50" max="300"></div>
+            </div>
             <button class="btn" id="btn-qr">生成</button>
-            <div class="result" id="qrOut" style="text-align:center">结果</div>
+            <button class="btn btn-success" id="btn-qr-download">下载</button>
+            <div class="result qr-container" id="qrOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📝 Lorem生成</h3>
+            <div class="row">
+                <div class="col"><div class="input-group"><input type="number" id="loremN" value="3" min="1" max="20"></div></div>
+                <div class="col"><select id="loremType"><option value="para">段落</option><option value="sent">句子</option><option value="word">单词</option></select></div>
+            </div>
+            <button class="btn" id="btn-lorem">生成</button>
+            <div class="result" id="loremOut">结果</div>
+        </div>
+    </div>
+
+    <div id="tab-conv" class="content">
+        <div class="card">
+            <h3>🎨 颜色转换</h3>
+            <div class="input-group"><input type="text" id="colorIn" placeholder="#1e3c72 或 rgb(30,60,114)"></div>
+            <button class="btn" id="btn-color">转换</button>
+            <span class="color-preview" id="colorPreview"></span>
+            <div class="result" id="colorOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📐 单位转换</h3>
+            <div class="row">
+                <div class="col"><input type="number" id="unitValue" placeholder="数值"></div>
+                <div class="col"><select id="unitFrom"><option value="px">px</option><option value="rem">rem</option><option value="em">em</option></select></div>
+                <div class="col"><select id="unitTo"><option value="rem">rem</option><option value="px">px</option><option value="em">em</option></select></div>
+            </div>
+            <div class="input-group" style="margin-top:5px;"><input type="number" id="baseSize" value="16" placeholder="基准字号(px)"></div>
+            <button class="btn" id="btn-unit">转换</button>
+            <div class="result" id="unitOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📊 JSON ↔ CSV</h3>
+            <div class="input-group"><textarea id="jsonCsvIn" placeholder="JSON数组 或 CSV文本"></textarea></div>
+            <button class="btn" id="btn-json-csv">JSON→CSV</button>
+            <button class="btn btn-secondary" id="btn-csv-json">CSV→JSON</button>
+            <div class="result" id="jsonCsvOut">结果</div>
         </div>
     </div>
 
@@ -181,7 +254,7 @@
         <div class="card">
             <h3>🔒 哈希生成</h3>
             <div class="input-group"><textarea id="hashIn" placeholder="输入文本"></textarea></div>
-            <div class="input-group"><select id="hashT"><option>MD5</option><option selected>SHA-256</option><option>SHA-512</option></select></div>
+            <div class="input-group"><select id="hashT"><option selected>SHA-256</option><option>SHA-512</option></select></div>
             <button class="btn" id="btn-hash">生成</button>
             <button class="btn btn-secondary" id="btn-hash-copy">复制</button>
             <div class="result" id="hashOut">结果</div>
@@ -189,7 +262,7 @@
     </div>
 
     <div class="footer">
-        🛠️ Dev Toolbox v1.0 | 按 Ctrl+Shift+D 快速打开
+        🛠️ Dev Toolbox v1.3.0 | 按 Ctrl+Shift+D 快速打开
     </div>
 
     <script src="popup.js"></script>
