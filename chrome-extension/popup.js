@@ -335,14 +335,17 @@ function smartFormatPage() {
                 }
         }
         
-        // 显示格式化结果
+        // 显示格式化结果（不添加类型标签，保持纯净以便重复格式化）
         const escaped = formatted
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;');
         
-        document.body.innerHTML = `<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;font-family:Monaco,Consolas,monospace;font-size:13px;white-space:pre-wrap;word-break:break-all;min-height:100vh;margin:0;"><span style="color:#569cd6;font-size:11px;">[检测为: ${type.toUpperCase()}]</span>\n\n${escaped}</pre>`;
+        document.body.innerHTML = `<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;font-family:Monaco,Consolas,monospace;font-size:13px;white-space:pre-wrap;word-break:break-all;min-height:100vh;margin:0;">${escaped}</pre>`;
         document.body.style.margin = '0';
+        
+        // 在控制台输出检测类型，方便调试
+        console.log(`[Dev Toolbox] 检测为: ${type.toUpperCase()}`);
         
     } catch (e) {
         alert('格式化失败: ' + e.message);
