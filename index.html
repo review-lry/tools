@@ -1,51 +1,201 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>开发者工具箱 - Chrome 扩展</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
-    h1 { color: #1e3c72; }
-    .download { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px 30px; border-radius: 8px; text-decoration: none; display: inline-block; margin: 20px 0; }
-    .download:hover { opacity: 0.9; }
-    pre { background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto; }
-    .feature { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛠️ 开发者工具箱</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { text-align: center; color: white; margin-bottom: 20px; }
+        header h1 { font-size: 2.2em; margin-bottom: 8px; }
+        header p { font-size: 1em; opacity: 0.9; }
+        .current-time { text-align: center; background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap; }
+        .current-time h2 { color: #1e3c72; margin: 0; font-size: 1em; }
+        .time-display { font-size: 1.3em; font-weight: bold; color: #2a5298; }
+        .timestamp-display { font-size: 0.95em; color: #666; font-family: monospace; }
+        .tab-nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; background: white; padding: 8px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+        .tab-btn { padding: 8px 16px; border: none; background: #f0f0f0; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.3s; }
+        .tab-btn:hover { background: #e0e0e0; }
+        .tab-btn.active { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 15px; }
+        .tool-card { background: white; border-radius: 10px; padding: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.12); transition: transform 0.3s, box-shadow 0.3s; }
+        .tool-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.18); }
+        .tool-card h3 { color: #1e3c72; margin-bottom: 12px; font-size: 1.1em; display: flex; align-items: center; gap: 6px; }
+        .input-group { margin-bottom: 10px; }
+        .input-group label { display: block; margin-bottom: 4px; color: #555; font-weight: 500; font-size: 12px; }
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 8px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 13px; font-family: 'Courier New', monospace; transition: border-color 0.3s; }
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus { outline: none; border-color: #2a5298; }
+        .input-group textarea { min-height: 80px; resize: vertical; }
+        .input-group small { color: #888; font-size: 10px; }
+        .btn { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; padding: 7px 14px; border-radius: 5px; cursor: pointer; font-size: 12px; transition: transform 0.2s; margin-right: 6px; margin-bottom: 6px; }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(30,60,114,0.4); }
+        .btn-secondary { background: linear-gradient(135deg, #6c757d 0%, #495057 100%); }
+        .result-box { background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 6px; padding: 10px; margin-top: 10px; min-height: 40px; max-height: 200px; overflow-y: auto; position: relative; font-size: 12px; }
+        .result-box pre { margin: 0; white-space: pre-wrap; word-wrap: break-word; font-family: 'Courier New', monospace; font-size: 11px; }
+        .result-box .placeholder { color: #999; font-style: italic; }
+        .copy-btn { position: absolute; top: 6px; right: 6px; background: #2a5298; color: white; border: none; padding: 3px 10px; border-radius: 3px; cursor: pointer; font-size: 10px; opacity: 0; transition: opacity 0.3s; }
+        .result-box:hover .copy-btn { opacity: 1; }
+        .row { display: flex; gap: 8px; }
+        .col { flex: 1; }
+        @media (max-width: 768px) { header h1 { font-size: 1.5em; } .tools-grid { grid-template-columns: 1fr; } .row { flex-direction: column; } .tab-btn { padding: 6px 12px; font-size: 11px; } .current-time { flex-direction: column; gap: 8px; } }
+    </style>
 </head>
 <body>
-  <h1>🛠️ 开发者工具箱</h1>
-  <p>常用开发工具集合 - JSON格式化、时间戳转换、Base64编解码、智能格式化</p>
-  
-  <a href="dev-toolbox.zip" class="download">📦 下载插件 (dev-toolbox.zip)</a>
-  
-  <h2>安装方法</h2>
-  <ol>
-    <li>下载 dev-toolbox.zip 并解压</li>
-    <li>打开 Chrome，访问 <code>chrome://extensions/</code></li>
-    <li>开启右上角的「开发者模式」</li>
-    <li>点击「加载已解压的扩展程序」</li>
-    <li>选择解压后的文件夹</li>
-  </ol>
-  
-  <h2>功能列表</h2>
-  <div class="feature">⏰ 时间工具 - 时间戳转换、日期计算</div>
-  <div class="feature">🔐 编解码 - Base64、URL、HTML</div>
-  <div class="feature">📝 格式化 - JSON、JWT、智能识别</div>
-  <div class="feature">📄 文本 - 统计、大小写、去重</div>
-  <div class="feature">🎲 生成器 - UUID、密码、二维码</div>
-  <div class="feature">🔒 安全 - SHA-256、SHA-512</div>
-  
-  <h2>自动更新</h2>
-  <p>Chrome 会自动检查 <a href="updates.xml">updates.xml</a> 获取更新</p>
-  
-  <h2>远程模块</h2>
-  <ul>
-    <li><a href="modules/config.json">模块配置</a></li>
-    <li><a href="modules/formatter.js">智能格式化模块</a></li>
-    <li><a href="modules/jwt-parser.js">JWT 解析模块</a></li>
-    <li><a href="modules/hash-generator.js">哈希生成模块</a></li>
-    <li><a href="modules/password-generator.js">密码生成模块</a></li>
-  </ul>
+    <div class="container">
+        <header><h1>🛠️ 开发者工具箱</h1><p>常用开发工具集合 - 提高开发效率</p></header>
+        <div class="current-time">
+            <div><h2>⏰ 当前时间</h2><div class="time-display" id="currentTime">加载中...</div></div>
+            <div><h2>📊 时间戳</h2><div class="timestamp-display" id="currentTimestamp">-</div></div>
+        </div>
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('time',this)">🕐 时间</button>
+            <button class="tab-btn" onclick="switchTab('encode',this)">🔐 编解码</button>
+            <button class="tab-btn" onclick="switchTab('format',this)">📝 格式化</button>
+            <button class="tab-btn" onclick="switchTab('text',this)">📄 文本</button>
+            <button class="tab-btn" onclick="switchTab('generate',this)">🎲 生成器</button>
+            <button class="tab-btn" onclick="switchTab('convert',this)">🔄 转换</button>
+            <button class="tab-btn" onclick="switchTab('security',this)">🔒 安全</button>
+            <button class="tab-btn" onclick="switchTab('image',this)">🖼️ 图片</button>
+        </div>
+
+        <div id="tab-time" class="tab-content active">
+            <div class="tools-grid">
+                <div class="tool-card"><h3>🕐 时间戳转换</h3><div class="input-group"><label>时间戳（秒/毫秒）</label><input type="text" id="timestampInput" placeholder="1672531200"></div><button class="btn" onclick="convertTimestamp()">转换</button><button class="btn btn-secondary" onclick="setNowTimestamp()">当前</button><div class="result-box" id="timestampResult"><span class="placeholder">结果</span></div></div>
+                <div class="tool-card"><h3>📅 日期转时间戳</h3><div class="input-group"><label>模式</label><select id="datetimeMode" onchange="toggleDatetimeMode()"><option value="picker">选择</option><option value="manual">手动输入</option></select></div><div class="input-group" id="datetimePickerGroup"><label>选择日期时间</label><input type="datetime-local" id="datetimeInput"></div><div class="input-group" id="datetimeManualGroup" style="display:none"><label>手动输入</label><input type="text" id="datetimeManualInput" placeholder="2024-01-01 12:00:00"><small>支持: YYYY-MM-DD HH:mm:ss</small></div><button class="btn" onclick="convertToTimestamp()">转换</button><button class="btn btn-secondary" onclick="setNowDateTime()">当前</button><div class="result-box" id="datetimeResult"><span class="placeholder">结果</span></div></div>
+                <div class="tool-card"><h3>⏱️ 时间差计算</h3><div class="row"><div class="col"><div class="input-group"><label>时间戳1</label><input type="text" id="timeCalc1" placeholder="起始"></div></div><div class="col"><div class="input-group"><label>时间戳2</label><input type="text" id="timeCalc2" placeholder="结束"></div></div></div><button class="btn" onclick="calcTimeDiff()">计算</button><button class="btn btn-secondary" onclick="setTimeCalcNow()">填当前</button><div class="result-box" id="timeCalcResult"><span class="placeholder">结果</span></div></div>
+                <div class="tool-card"><h3>📆 日期推算</h3><div class="input-group"><label>基准时间戳（留空=当前）</label><input type="text" id="dateBaseInput"></div><div class="input-group"><label>天数（正/负）</label><input type="number" id="daysToAdd" value="7"></div><button class="btn" onclick="calcFutureDate()">计算</button><div class="result-box" id="dateCalcResult"><span class="placeholder">结果</span></div></div>
+            </div>
+        </div>
+
+        <div id="tab-encode" class="tab-content">
+            <div class="tools-grid">
+                <div class="tool-card"><h3>🔐 Base64</h3><div class="input-group"><label>输入</label><textarea id="base64Input"></textarea></div><button class="btn" onclick="encodeBase64()">编码</button><button class="btn btn-secondary" onclick="decodeBase64()">解码</button><div class="result-box" id="base64Result"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('base64Result')">复制</button></div></div>
+                <div class="tool-card"><h3>🔗 URL</h3><div class="input-group"><label>输入</label><textarea id="urlInput"></textarea></div><button class="btn" onclick="encodeURL()">编码</button><button class="btn btn-secondary" onclick="decodeURL()">解码</button><div class="result-box" id="urlResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('urlResult')">复制</button></div></div>
+                <div class="tool-card"><h3>🌐 HTML转义</h3><div class="input-group"><label>输入</label><textarea id="htmlInput"></textarea></div><button class="btn" onclick="encodeHTML()">转义</button><button class="btn btn-secondary" onclick="decodeHTML()">反转义</button><div class="result-box" id="htmlResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('htmlResult')">复制</button></div></div>
+                <div class="tool-card"><h3>🌏 Unicode</h3><div class="input-group"><label>输入</label><textarea id="unicodeInput"></textarea></div><button class="btn" onclick="encodeUnicode()">文本→Unicode</button><button class="btn btn-secondary" onclick="decodeUnicode()">Unicode→文本</button><div class="result-box" id="unicodeResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('unicodeResult')">复制</button></div></div>
+            </div>
+        </div>
+
+        <div id="tab-format" class="tab-content">
+            <div class="tools-grid">
+                <div class="tool-card"><h3>📝 JSON</h3><div class="input-group"><label>输入</label><textarea id="jsonInput"></textarea></div><button class="btn" onclick="formatJSON()">格式化</button><button class="btn btn-secondary" onclick="compressJSON()">压缩</button><div class="result-box" id="jsonResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('jsonResult')">复制</button></div></div>
+                <div class="tool-card"><h3>🗃️ SQL</h3><div class="input-group"><label>输入</label><textarea id="sqlInput"></textarea></div><button class="btn" onclick="formatSQL()">格式化</button><button class="btn btn-secondary" onclick="compressSQL()">压缩</button><div class="result-box" id="sqlResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('sqlResult')">复制</button></div></div>
+                <div class="tool-card"><h3>📋 XML</h3><div class="input-group"><label>输入</label><textarea id="xmlInput"></textarea></div><button class="btn" onclick="formatXML()">格式化</button><button class="btn btn-secondary" onclick="compressXML()">压缩</button><div class="result-box" id="xmlResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('xmlResult')">复制</button></div></div>
+                <div class="tool-card"><h3>🎫 JWT</h3><div class="input-group"><label>Token</label><textarea id="jwtInput"></textarea></div><button class="btn" onclick="parseJWT()">解析</button><div class="result-box" id="jwtResult"><span class="placeholder">结果</span></div></div>
+            </div>
+        </div>
+
+        <div id="tab-text" class="tab-content">
+            <div class="tools-grid">
+                <div class="tool-card"><h3>📊 文本统计</h3><div class="input-group"><label>输入</label><textarea id="statsInput" oninput="calculateStats()"></textarea></div><div class="result-box" id="statsResult"><span class="placeholder">统计</span></div></div>
+                <div class="tool-card"><h3>📝 差异对比</h3><div class="row"><div class="col"><div class="input-group"><label>文本1</label><textarea id="diffInput1"></textarea></div></div><div class="col"><div class="input-group"><label>文本2</label><textarea id="diffInput2"></textarea></div></div></div><button class="btn" onclick="compareText()">对比</button><div class="result-box" id="diffResult"><span class="placeholder">结果</span></div></div>
+                <div class="tool-card"><h3>🔠 大小写</h3><div class="input-group"><label>输入</label><textarea id="caseInput"></textarea></div><button class="btn" onclick="toUpperCase()">大写</button><button class="btn" onclick="toLowerCase()">小写</button><button class="btn btn-secondary" onclick="toCapitalize()">首字母</button><div class="result-box" id="caseResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('caseResult')">复制</button></div></div>
+                <div class="tool-card"><h3>🔍 正则测试</h3><div class="input-group"><label>正则</label><input type="text" id="regexPattern" placeholder="^\d+$"></div><div class="input-group"><label>文本</label><textarea id="regexInput"></textarea></div><button class="btn" onclick="testRegex()">测试</button><div class="result-box" id="regexResult"><span class="placeholder">结果</span></div></div>
+                <div class="tool-card"><h3>📋 排序去重</h3><div class="input-group"><label>每行一个</label><textarea id="sortInput"></textarea></div><button class="btn" onclick="sortLines(true)">升序</button><button class="btn btn-secondary" onclick="sortLines(false)">降序</button><button class="btn btn-secondary" onclick="uniqueLines()">去重</button><button class="btn btn-secondary" onclick="shuffleLines()">随机</button><div class="result-box" id="sortResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('sortResult')">复制</button></div></div>
+                <div class="tool-card"><h3>📖 Lorem</h3><div class="input-group"><label>段落数</label><input type="number" id="loremCount" value="3"></div><button class="btn" onclick="generateLorem('cn')">中文</button><button class="btn btn-secondary" onclick="generateLorem('en')">英文</button><div class="result-box" id="loremResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('loremResult')">复制</button></div></div>
+            </div>
+        </div>
+
+        <div id="tab-generate" class="tab-content">
+            <div class="tools-grid">
+                <div class="tool-card"><h3>🆔 UUID</h3><div class="input-group"><label>数量</label><input type="number" id="uuidCount" value="1"></div><button class="btn" onclick="generateUUID()">生成</button><div class="result-box" id="uuidResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('uuidResult')">复制</button></div></div>
+                <div class="tool-card"><h3>🔑 密码</h3><div class="input-group"><label>长度</label><input type="number" id="pwdLength" value="16"></div><div class="row"><div class="col"><label><input type="checkbox" id="pwdUpper" checked> 大写</label></div><div class="col"><label><input type="checkbox" id="pwdLower" checked> 小写</label></div><div class="col"><label><input type="checkbox" id="pwdNumber" checked> 数字</label></div><div class="col"><label><input type="checkbox" id="pwdSpecial" checked> 特殊</label></div></div><button class="btn" onclick="generatePassword()">生成</button><button class="btn btn-secondary" onclick="generatePassword(5)">5个</button><div class="result-box" id="pwdResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('pwdResult')">复制</button></div></div>
+                <div class="tool-card"><h3>🎲 随机数</h3><div class="row"><div class="col"><div class="input-group"><label>最小</label><input type="number" id="randMin" value="1"></div></div><div class="col"><div class="input-group"><label>最大</label><input type="number" id="randMax" value="100"></div></div><div class="col"><div class="input-group"><label>数量</label><input type="number" id="randCount" value="1"></div></div></div><button class="btn" onclick="generateRandom()">生成</button><label><input type="checkbox" id="randUnique"> 不重复</label><div class="result-box" id="randResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('randResult')">复制</button></div></div>
+                <div class="tool-card"><h3>📱 二维码</h3><div class="input-group"><label>内容</label><input type="text" id="qrInput" placeholder="https://..."></div><button class="btn" onclick="generateQRCode()">生成</button><div class="result-box" id="qrResult" style="text-align:center"><span class="placeholder">结果</span></div></div>
+            </div>
+        </div>
+
+        <div id="tab-convert" class="tab-content">
+            <div class="tools-grid">
+                <div class="tool-card"><h3>🔢 进制</h3><div class="input-group"><label>数字</label><input type="text" id="numberInput"></div><div class="input-group"><label>进制</label><select id="fromBase"><option value="10">十进制</option><option value="2">二进制</option><option value="8">八进制</option><option value="16">十六进制</option></select></div><button class="btn" onclick="convertNumber()">转换</button><div class="result-box" id="numberResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('numberResult')">复制</button></div></div>
+                <div class="tool-card"><h3>🎨 颜色</h3><div class="row"><div class="col"><div class="input-group"><label>选择</label><input type="color" id="colorPicker" value="#1e3c72" style="height:36px;width:100%"></div></div><div class="col"><div class="input-group"><label>Hex</label><input type="text" id="hexInput" value="#1e3c72" onchange="updateColorFromHex()"></div></div></div><button class="btn" onclick="convertColor()">转换</button><div class="result-box" id="colorResult"><span class="placeholder">结果</span></div></div>
+                <div class="tool-card"><h3>📊 CSV</h3><div class="input-group"><label>输入</label><textarea id="csvInput"></textarea></div><button class="btn" onclick="csvToJson()">CSV→JSON</button><button class="btn btn-secondary" onclick="jsonToCsv()">JSON→CSV</button><button class="btn btn-secondary" onclick="csvToMarkdown()">CSV→MD</button><div class="result-box" id="csvResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('csvResult')">复制</button></div></div>
+                <div class="tool-card"><h3>📏 单位</h3><div class="input-group"><label>类型</label><select id="unitType" onchange="updateUnitOptions()"><option value="length">长度</option><option value="weight">重量</option><option value="temperature">温度</option><option value="data">存储</option></select></div><div class="row"><div class="col"><div class="input-group"><label>值</label><input type="number" id="unitValue" value="1"></div></div><div class="col"><div class="input-group"><label>从</label><select id="unitFrom"></select></div></div><div class="col"><div class="input-group"><label>到</label><select id="unitTo"></select></div></div></div><button class="btn" onclick="convertUnit()">转换</button><div class="result-box" id="unitResult"><span class="placeholder">结果</span></div></div>
+            </div>
+        </div>
+
+        <div id="tab-security" class="tab-content">
+            <div class="tools-grid">
+                <div class="tool-card"><h3>🔒 MD5</h3><div class="input-group"><label>输入</label><textarea id="md5Input"></textarea></div><button class="btn" onclick="generateMD5()">生成</button><div class="result-box" id="md5Result"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('md5Result')">复制</button></div></div>
+                <div class="tool-card"><h3>🔐 SHA</h3><div class="input-group"><label>输入</label><textarea id="shaInput"></textarea></div><div class="input-group"><label>算法</label><select id="shaType"><option>SHA-1</option><option selected>SHA-256</option><option>SHA-512</option></select></div><button class="btn" onclick="generateSHA()">生成</button><div class="result-box" id="shaResult"><span class="placeholder">结果</span><button class="copy-btn" onclick="copyResult('shaResult')">复制</button></div></div>
+                <div class="tool-card"><h3>✅ 哈希验证</h3><div class="input-group"><label>原文</label><textarea id="hashVerifyInput"></textarea></div><div class="input-group"><label>哈希值</label><input type="text" id="hashVerifyValue"></div><div class="input-group"><label>算法</label><select id="hashVerifyType"><option>MD5</option><option selected>SHA-256</option></select></div><button class="btn" onclick="verifyHash()">验证</button><div class="result-box" id="hashVerifyResult"><span class="placeholder">结果</span></div></div>
+            </div>
+        </div>
+
+        <div id="tab-image" class="tab-content">
+            <div class="tools-grid">
+                <div class="tool-card"><h3>🖼️ 图片转Base64</h3><div class="input-group"><label>选择图片</label><input type="file" id="imgFile" accept="image/*" onchange="imgToBase64()"></div><div class="result-box" id="imgBase64Result"><span class="placeholder">选择图片后自动转换</span><button class="copy-btn" onclick="copyResult('imgBase64Result')">复制</button></div></div>
+                <div class="tool-card"><h3>📋 Base64转图片</h3><div class="input-group"><label>Base64</label><textarea id="base64ImgInput" placeholder="data:image/png;base64,..."></textarea></div><button class="btn" onclick="base64ToImg()">转换</button><div class="result-box" id="base64ImgResult" style="text-align:center"><span class="placeholder">结果</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+var updateTime=function(){var n=new Date;document.getElementById("currentTime").textContent=n.toLocaleString("zh-CN"),document.getElementById("currentTimestamp").textContent=Math.floor(n.getTime()/1e3)};setInterval(updateTime,1e3),updateTime();
+function switchTab(a,b){document.querySelectorAll(".tab-btn").forEach(function(a){a.classList.remove("active")}),document.querySelectorAll(".tab-content").forEach(function(a){a.classList.remove("active")}),b.classList.add("active"),document.getElementById("tab-"+a).classList.add("active")}
+function showResult(a,b){var c=document.getElementById(a),d=c.querySelector(".copy-btn");c.innerHTML=b,d&&(c.innerHTML+='<button class="copy-btn" onclick="copyResult(\''+a+"')\">复制</button>")}
+function copyResult(a){var b=document.getElementById(a).innerText;navigator.clipboard.writeText(b).then(function(){var b=document.getElementById(a).querySelector(".copy-btn");b&&(b.textContent="已复制!",setTimeout(function(){b.textContent="复制"},1500))})}
+function convertTimestamp(){var a=parseInt(document.getElementById("timestampInput").value);if(isNaN(a))return showResult("timestampResult","请输入有效时间戳");a<1e10&&(a*=1e3);var b=new Date(a);showResult("timestampResult","<strong>本地:</strong> "+b.toLocaleString("zh-CN")+"<br><strong>UTC:</strong> "+b.toISOString()+"<br><strong>秒:</strong> "+Math.floor(a/1e3)+"<br><strong>毫秒:</strong> "+a)}
+function setNowTimestamp(){document.getElementById("timestampInput").value=Math.floor(Date.now()/1e3),convertTimestamp()}
+function toggleDatetimeMode(){var a=document.getElementById("datetimeMode").value;document.getElementById("datetimePickerGroup").style.display="picker"===a?"block":"none",document.getElementById("datetimeManualGroup").style.display="manual"===a?"block":"none"}
+function convertToTimestamp(){var a,b=document.getElementById("datetimeMode").value;if("picker"===b){var c=document.getElementById("datetimeInput").value;if(!c)return showResult("datetimeResult","请选择时间");a=new Date(c)}else{var d=document.getElementById("datetimeManualInput").value.trim();if(!d)return showResult("datetimeResult","请输入时间");if(a=new Date(d.replace(/[年月日\/]/g,function(a){return{年:"-",月:"-",日:" ","\/":"-"}[a]||a})),isNaN(a.getTime()))return showResult("datetimeResult",'<span style="color:red">格式错误</span>')}showResult("datetimeResult","<strong>秒:</strong> "+Math.floor(a.getTime()/1e3)+"<br><strong>毫秒:</strong> "+a.getTime()+"<br><strong>时间:</strong> "+a.toLocaleString("zh-CN"))}
+function setNowDateTime(){var a=new Date;a.setMinutes(a.getMinutes()-a.getTimezoneOffset()),document.getElementById("datetimeInput").value=a.toISOString().slice(0,16),document.getElementById("datetimeManualInput").value=a.toLocaleString("zh-CN")}
+function calcTimeDiff(){var a=parseInt(document.getElementById("timeCalc1").value)||Date.now(),b=parseInt(document.getElementById("timeCalc2").value)||Date.now();a<1e10&&(a*=1e3),b<1e10&&(b*=1e3);var c=Math.abs(b-a),d=Math.floor(c/864e5),e=Math.floor(c%864e5/36e5),f=Math.floor(c%36e5/6e4),g=Math.floor(c%6e4/1e3);showResult("timeCalcResult","<strong>差值:</strong> "+d+"天 "+e+"时 "+f+"分 "+g+"秒<br><strong>毫秒:</strong> "+c)}
+function setTimeCalcNow(){document.getElementById("timeCalc1").value=Math.floor(Date.now()/1e3),document.getElementById("timeCalc2").value=""}
+function calcFutureDate(){var a=parseInt(document.getElementById("dateBaseInput").value)||Math.floor(Date.now()/1e3);a<1e10&&(a*=1e3);var b=parseInt(document.getElementById("daysToAdd").value)||0,c=new Date(a);c.setDate(c.getDate()+b),showResult("dateCalcResult","<strong>结果:</strong> "+c.toLocaleString("zh-CN")+"<br><strong>时间戳:</strong> "+Math.floor(c.getTime()/1e3))}
+function encodeBase64(){try{showResult("base64Result",btoa(unescape(encodeURIComponent(document.getElementById("base64Input").value))))}catch(a){showResult("base64Result",'<span style="color:red">编码失败</span>')}}
+function decodeBase64(){try{showResult("base64Result",decodeURIComponent(escape(atob(document.getElementById("base64Input").value.trim()))))}catch(a){showResult("base64Result",'<span style="color:red">解码失败</span>')}}
+function encodeURL(){showResult("urlResult",encodeURIComponent(document.getElementById("urlInput").value))}
+function decodeURL(){try{showResult("urlResult",decodeURIComponent(document.getElementById("urlInput").value))}catch(a){showResult("urlResult",'<span style="color:red">解码失败</span>')}}
+function encodeHTML(){var a=document.createElement("div");a.textContent=document.getElementById("htmlInput").value,showResult("htmlResult",a.innerHTML)}
+function decodeHTML(){var a=document.createElement("div");a.innerHTML=document.getElementById("htmlInput").value,showResult("htmlResult",a.textContent)}
+function encodeUnicode(){showResult("unicodeResult",document.getElementById("unicodeInput").value.split("").map(function(a){return"\\u"+a.charCodeAt(0).toString(16).padStart(4,"0")}).join(""))}
+function decodeUnicode(){try{showResult("unicodeResult",document.getElementById("unicodeInput").value.replace(/\\u([0-9a-fA-F]{4})/g,function(a,b){return String.fromCharCode(parseInt(b,16))}))}catch(a){showResult("unicodeResult",'<span style="color:red">解码失败</span>')}}
+function formatJSON(){var a=document.getElementById("jsonInput").value.trim();if(!a)return showResult("jsonResult","请输入JSON");try{var b=JSON.parse(a),c=JSON.stringify(b,null,2);showResult("jsonResult","<pre>"+syntaxHighlight(c)+"</pre>")}catch(d){showResult("jsonResult",'<span style="color:red">无效JSON: '+d.message+"</span>")}}
+function compressJSON(){var a=document.getElementById("jsonInput").value.trim();if(!a)return showResult("jsonResult","请输入JSON");try{var b=JSON.parse(a);showResult("jsonResult",JSON.stringify(b))}catch(c){showResult("jsonResult",'<span style="color:red">无效JSON</span>')}}
+function syntaxHighlight(a){return a=a.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,function(a){var b="number";return/^"/.test(a)?b=/:$/.test(a)?"key":"string":/true|false/.test(a)?b="boolean":/null/.test(a)&&(b="null"),'<span style="color:'+{string:"#2a5298",number:"#1e3c72",boolean:"#d63384",null:"#6c757d",key:"#0d6efd"}[b]+';">'+a+"</span>"})}
+function formatSQL(){var a=document.getElementById("sqlInput").value.trim();if(!a)return showResult("sqlResult","请输入SQL");var b=a.replace(/\s+/g," ").replace(/\s*,\s*/g,", ").replace(/\s*=\s*/g," = ").replace(/\s+AND\s+/gi,"\nAND ").replace(/\s+OR\s+/gi,"\nOR ").replace(/\s+WHERE\s+/gi,"\nWHERE ").replace(/\s+FROM\s+/gi,"\nFROM ").replace(/\s+JOIN\s+/gi,"\nJOIN ").replace(/\s+LEFT\s+JOIN\s+/gi,"\nLEFT JOIN ").replace(/\s+RIGHT\s+JOIN\s+/gi,"\nRIGHT JOIN ").replace(/\s+INNER\s+JOIN\s+/gi,"\nINNER JOIN ").replace(/\s+GROUP\s+BY\s+/gi,"\nGROUP BY ").replace(/\s+ORDER\s+BY\s+/gi,"\nORDER BY ").replace(/\s+HAVING\s+/gi,"\nHAVING ").replace(/\s+LIMIT\s+/gi,"\nLIMIT ").replace(/\s+OFFSET\s+/gi,"\nOFFSET ").trim();showResult("sqlResult","<pre>"+b+"</pre>")}
+function compressSQL(){showResult("sqlResult",document.getElementById("sqlInput").value.replace(/\s+/g," ").trim())}
+function formatXML(){var a=document.getElementById("xmlInput").value.trim();if(!a)return showResult("xmlResult","请输入XML");var b=a.replace(/>\s*</g,">\n<").replace(/^\s+|\s+$/gm,""),c="",d=0;b.split("\n").forEach(function(a){a.match(/<\/\w/)?c+="  ".repeat(--d)+a+"\n":a.match(/<\w[^>]*[^\/]>/)?c+="  ".repeat(d++)+a+"\n":c+="  ".repeat(d)+a+"\n"}),showResult("xmlResult","<pre>"+c.trim()+"</pre>")}
+function compressXML(){showResult("xmlResult",document.getElementById("xmlInput").value.replace(/>\s+</g,"><").trim())}
+function parseJWT(){var a=document.getElementById("jwtInput").value.trim();if(!a)return showResult("jwtResult","请输入JWT");var b=a.split(".");if(3!==b.length)return showResult("jwtResult",'<span style="color:red">无效JWT</span>');try{var c=JSON.parse(atob(b[0])),d=JSON.parse(atob(b[1]));showResult("jwtResult","<strong>Header:</strong><pre>"+JSON.stringify(c,null,2)+"</pre><strong>Payload:</strong><pre>"+JSON.stringify(d,null,2)+"</pre><strong>Signature:</strong> "+b[2].substring(0,20)+"...")}catch(e){showResult("jwtResult",'<span style="color:red">解析失败</span>')}}
+function calculateStats(){var a=document.getElementById("statsInput").value,b=a.length,c=a.replace(/\s/g,"").length,d=a.trim()?a.trim().split(/\s+/).length:0,e=a.split("\n").length,f=a.trim()?a.split(/\n\s*\n/).length:0,g=(a.match(/[\u4e00-\u9fa5]/g)||[]).length;showResult("statsResult","<strong>字符数:</strong> "+b+"<br><strong>字符(不含空格):</strong> "+c+"<br><strong>单词数:</strong> "+d+"<br><strong>中文字数:</strong> "+g+"<br><strong>行数:</strong> "+e+"<br><strong>段落数:</strong> "+f)}
+function compareText(){var a=document.getElementById("diffInput1").value.split("\n"),b=document.getElementById("diffInput2").value.split("\n"),c=Math.max(a.length,b.length),d=[];for(var e=0;e<c;e++){var f=a[e]||"",g=b[e]||"";f===g?d.push(f):f&&!g?d.push('<span style="background:#f8d7da;text-decoration:line-through">'+f+"</span>"):!f&&g?d.push('<span style="background:#d4edda">'+g+"</span>"):d.push('<span style="background:#f8d7da;text-decoration:line-through">'+f+'</span> → <span style="background:#d4edda">'+g+"</span>")}showResult("diffResult","<pre>"+d.join("\n")+"</pre>")}
+function toUpperCase(){showResult("caseResult",document.getElementById("caseInput").value.toUpperCase())}
+function toLowerCase(){showResult("caseResult",document.getElementById("caseInput").value.toLowerCase())}
+function toCapitalize(){showResult("caseResult",document.getElementById("caseInput").value.replace(/\b\w/g,function(a){return a.toUpperCase()}))}
+function testRegex(){var a=document.getElementById("regexPattern").value,b=document.getElementById("regexInput").value;if(!a)return showResult("regexResult","请输入正则表达式");try{var c=new RegExp(a,"g"),d=b.match(c);d?showResult("regexResult","<strong>找到 "+d.length+" 个匹配:</strong><br>"+d.map(function(a){return'<code style="background:#f0f0f0;padding:2px 5px;border-radius:3px;margin:2px;">'+a+"</code>"}).join("")):showResult("regexResult",'<span style="color:orange">没有找到匹配</span>')}catch(e){showResult("regexResult",'<span style="color:red">无效正则: '+e.message+"</span>")}}
+function sortLines(a){var b=document.getElementById("sortInput").value.split("\n").filter(function(a){return a.trim()});b.sort(function(b,c){return a?b.localeCompare(c,"zh-CN"):c.localeCompare(b,"zh-CN")}),showResult("sortResult",b.join("\n"))}
+function uniqueLines(){var a=document.getElementById("sortInput").value.split("\n").filter(function(a){return a.trim()}),b=[...new Set(a)];showResult("sortResult",b.join("\n"))}
+function shuffleLines(){var a=document.getElementById("sortInput").value.split("\n").filter(function(a){return a.trim()});for(var b=a.length-1;b>0;b--){var c=Math.floor(Math.random()*(b+1));[a[b],a[c]]=[a[c],a[b]]}showResult("sortResult",a.join("\n"))}
+function generateLorem(a){var b=parseInt(document.getElementById("loremCount").value)||3,c=[],d={cn:["开发者工具箱是一个集合了多种常用开发工具的在线平台，旨在提高开发者的工作效率。","无论你是前端开发者、后端工程师还是全栈开发者，这里都有你需要的工具。","我们致力于打造最实用、最便捷的开发工具集合，让繁琐的工作变得简单。","时间戳转换、JSON格式化、Base64编解码，这些高频操作都可以在这里一键完成。","不需要安装任何软件，打开网页就能使用，随时随地提高你的开发效率。","工具箱持续更新中，欢迎提出你的建议和需求，我们会不断完善。"],en:["Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.","Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.","Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.","Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.","Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium."]};for(var e=0;e<b;e++)c.push(d[a][e%d[a].length]);showResult("loremResult",c.join("\n\n"))}
+function generateUUID(){var a=parseInt(document.getElementById("uuidCount").value)||1,b=[];for(var c=0;c<Math.min(a,100);c++){var d="xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(a){var b=16*Math.random()|0;return("x"===a?b:3&b|8).toString(16)});b.push(d)}showResult("uuidResult",b.join("\n"))}
+function generatePassword(a){a=a||1;var b=parseInt(document.getElementById("pwdLength").value)||16,c="";document.getElementById("pwdUpper").checked&&(c+="ABCDEFGHIJKLMNOPQRSTUVWXYZ"),document.getElementById("pwdLower").checked&&(c+="abcdefghijklmnopqrstuvwxyz"),document.getElementById("pwdNumber").checked&&(c+="0123456789"),document.getElementById("pwdSpecial").checked&&(c+="!@#$%^&*()_+-=[]{}|;:,.<>?");for(var d=[],e=0;e<a;e++){for(var f="",g=0;g<b;g++)f+=c.charAt(Math.floor(Math.random()*c.length));d.push(f)}showResult("pwdResult",d.join("\n"))}
+function generateRandom(){var a=parseInt(document.getElementById("randMin").value)||0,b=parseInt(document.getElementById("randMax").value)||100,c=parseInt(document.getElementById("randCount").value)||1,d=document.getElementById("randUnique").checked,e=[];if(d&&c>b-a+1)return showResult("randResult",'<span style="color:red">范围太小，无法生成不重复的随机数</span>');for(var f=0;f<c;f++){var g=Math.floor(Math.random()*(b-a+1))+a;d?e.includes(g)?f--:e.push(g):e.push(g)}showResult("randResult",e.join(", "))}
+function generateQRCode(){var a=document.getElementById("qrInput").value.trim();if(!a)return showResult("qrResult","请输入内容");var b="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data="+encodeURIComponent(a);document.getElementById("qrResult").innerHTML='<img src="'+b+'" alt="QR Code" style="max-width:150px">'}
+function convertNumber(){var a=document.getElementById("numberInput").value.trim(),b=parseInt(document.getElementById("fromBase").value);if(!a)return showResult("numberResult","请输入数字");var c=parseInt(a,b);if(isNaN(c))return showResult("numberResult",'<span style="color:red">无效数字</span>');showResult("numberResult","<strong>十进制:</strong> "+c.toString(10)+"<br><strong>二进制:</strong> "+c.toString(2)+"<br><strong>八进制:</strong> "+c.toString(8)+"<br><strong>十六进制:</strong> "+c.toString(16).toUpperCase())}
+document.getElementById("colorPicker").addEventListener("input",function(){document.getElementById("hexInput").value=this.value,convertColor()});
+function updateColorFromHex(){var a=document.getElementById("hexInput").value;/^#[0-9A-Fa-f]{6}$/.test(a)&&(document.getElementById("colorPicker").value=a,convertColor())}
+function convertColor(){var a=document.getElementById("hexInput").value;if(!/^#[0-9A-Fa-f]{6}$/.test(a))return showResult("colorResult",'<span style="color:red">无效Hex值</span>');var b=parseInt(a.slice(1,3),16),c=parseInt(a.slice(3,5),16),d=parseInt(a.slice(5,7),16),e=rgbToHsl(b,c,d);showResult("colorResult",'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:50px;height:50px;background:'+a+';border:2px solid #ccc;border-radius:5px"></div><div><strong>HEX:</strong> '+a.toUpperCase()+'<br><strong>RGB:</strong> rgb('+b+", "+c+", "+d+')<br><strong>HSL:</strong> '+e+"</div></div>")}
+function rgbToHsl(a,b,c){a/=255,b/=255,c/=255;var d=Math.max(a,b,c),e=Math.min(a,b,c),f,g,h=(d+e)/2;if(d===e)f=g=0;else{var i=d-e;g=h>.5?i/(2-d-e):i/(d+e);switch(d){case a:f=((b-c)/i+(b<c?6:0))/6;break;case b:f=((c-a)/i+2)/6;break;case c:f=((a-b)/i+4)/6}}return"hsl("+Math.round(360*f)+", "+Math.round(100*g)+"%, "+Math.round(100*h)+"%)"}
+function csvToJson(){var a=document.getElementById("csvInput").value.trim();if(!a)return showResult("csvResult","请输入CSV");for(var b=a.split("\n"),c=b[0].split(","),d=[],e=1;e<b.length;e++){var f={};b[e].split(",").forEach(function(a,b){f[c[b].trim()]=a.trim()}),d.push(f)}showResult("csvResult","<pre>"+JSON.stringify(d,null,2)+"</pre>")}
+function jsonToCsv(){var a=document.getElementById("csvInput").value.trim();if(!a)return showResult("csvResult","请输入JSON");try{var b=JSON.parse(a);if(!Array.isArray(b))return showResult("csvResult",'<span style="color:red">JSON必须是数组</span>');var c=Object.keys(b[0]),d=[c.join(",")];b.forEach(function(a){d.push(Object.values(a).join(","))}),showResult("csvResult","<pre>"+d.join("\n")+"</pre>")}catch(e){showResult("csvResult",'<span style="color:red">无效JSON</span>')}}
+function csvToMarkdown(){var a=document.getElementById("csvInput").value.trim();if(!a)return showResult("csvResult","请输入CSV");for(var b=a.split("\n"),c=b[0].split(","),d=["| "+c.join(" | ")+" |", "| "+c.map(function(){return"---"}).join(" | ")+" |"],e=1;e<b.length;e++)d.push("| "+b[e].split(",").join(" | ")+" |");showResult("csvResult","<pre>"+d.join("\n")+"</pre>")}
+var units={length:{m:1,km:1e3,cm:.01,mm:.001,mi:1609.34,ft:.3048,in:.0254},weight:{kg:1,g:.001,mg:1e-6,lb:.453592,oz:.0283495},temperature:{c:[function(a){return a},function(a){return a}],"f":[function(a){return(a-32)*5/9},function(a){return a*9/5+32}],k:[function(a){return a-273.15},function(a){return a+273.15}]},data:{b:1,kb:1024,mb:1048576,gb:1073741824,tb:1099511627776}};
+var unitNames={length:{m:"米",km:"千米",cm:"厘米",mm:"毫米",mi:"英里",ft:"英尺",in:"英寸"},weight:{kg:"千克",g:"克",mg:"毫克",lb:"磅",oz:"盎司"},temperature:{c:"摄氏度","f":"华氏度",k:"开尔文"},data:{b:"字节",kb:"KB",mb:"MB",gb:"GB",tb:"TB"}};
+function updateUnitOptions(){var a=document.getElementById("unitType").value,b=units[a],c=Object.keys(b),d=document.getElementById("unitFrom"),e=document.getElementById("unitTo");d.innerHTML="",e.innerHTML="",c.forEach(function(a){d.innerHTML+='<option value="'+a+'">'+(unitNames[a][a]||a)+"</option>",e.innerHTML+='<option value="'+a+'">'+(unitNames[a][a]||a)+"</option>"}),e.selectedIndex=c.length>1?1:0}
+updateUnitOptions();
+function convertUnit(){var a=document.getElementById("unitType").value,b=document.getElementById("unitFrom").value,c=document.getElementById("unitTo").value,d=parseFloat(document.getElementById("unitValue").value)||0,e=units[a];if("temperature"===a){var f=e[b][0](d),g=e[c][1](f);showResult("unitResult","<strong>结果:</strong> "+g.toFixed(4)+" "+(unitNames[a][c]||c))}else{var h=d*e[b],i=h/e[c];showResult("unitResult","<strong>结果:</strong> "+i.toFixed(6)+" "+(unitNames[a][c]||c))}}
+function generateMD5(){var a=document.getElementById("md5Input").value;if(!a)return showResult("md5Result","请输入文本");showResult("md5Result",CryptoJS.MD5(a).toString())}
+function generateSHA(){var a=document.getElementById("shaInput").value;if(!a)return showResult("shaResult","请输入文本");var b=document.getElementById("shaType").value,c=CryptoJS[b.replace("-","")](a).toString();showResult("shaResult",c)}
+function verifyHash(){var a=document.getElementById("hashVerifyInput").value,b=document.getElementById("hashVerifyValue").value.trim();if(!a||!b)return showResult("hashVerifyResult","请输入原文和哈希值");var c=document.getElementById("hashVerifyType").value,d="MD5"===c?CryptoJS.MD5(a).toString():CryptoJS.SHA256(a).toString();d===b?showResult("hashVerifyResult",'<span style="color:green">✅ 验证通过！哈希值匹配</span>'):showResult("hashVerifyResult",'<span style="color:red">❌ 验证失败！哈希值不匹配</span><br><strong>计算结果:</strong> '+d)}
+function imgToBase64(){var a=document.getElementById("imgFile").files[0];if(!a)return;var b=new FileReader;b.onload=function(b){showResult("imgBase64Result",b.target.result)},b.readAsDataURL(a)}
+function base64ToImg(){var a=document.getElementById("base64ImgInput").value.trim();if(!a)return showResult("base64ImgResult","请输入Base64");try{document.getElementById("base64ImgResult").innerHTML='<img src="'+a+'" style="max-width:100%;max-height:150px">'}catch(b){showResult("base64ImgResult",'<span style="color:red">转换失败</span>')}}
+    </script>
 </body>
 </html>
-<!-- cache bust: 1772277140 -->
