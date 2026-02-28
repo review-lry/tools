@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-02-28T00:00:00Z",
+  "message": "",
+  "modules": {
+    "formatter": {
+      "name": "智能格式化",
+      "version": "1.2.0",
+      "url": "https://review-lry.github.io/tools/modules/formatter.js",
+      "description": "自动识别 JSON/XML/YAML/CSV/SQL 并格式化"
+    },
+    "jwt-parser": {
+      "name": "JWT 解析器",
+      "version": "1.1.0",
+      "url": "https://review-lry.github.io/tools/modules/jwt-parser.js",
+      "description": "JWT Token 解析和过期检查"
+    },
+    "hash-generator": {
+      "name": "哈希生成器",
+      "version": "1.0.0",
+      "url": "https://review-lry.github.io/tools/modules/hash-generator.js",
+      "description": "SHA-256/SHA-512 哈希生成"
+    }
+  }
+}
