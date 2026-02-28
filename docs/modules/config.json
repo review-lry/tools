@@ -1,13 +1,13 @@
 {
-  "version": "1.0.0",
-  "updated": "2026-02-28T00:00:00Z",
-  "message": "",
+  "version": "1.2.0",
+  "updated": "2026-02-28T07:15:00Z",
+  "message": "🎉 新增动态模块更新功能",
   "modules": {
     "formatter": {
       "name": "智能格式化",
       "version": "1.2.0",
       "url": "https://review-lry.github.io/tools/modules/formatter.js",
-      "description": "自动识别 JSON/XML/YAML/CSV/SQL 并格式化"
+      "description": "自动识别并格式化 JSON/XML/YAML/CSV/SQL"
     },
     "jwt-parser": {
       "name": "JWT 解析器",
@@ -20,6 +20,17 @@
       "version": "1.0.0",
       "url": "https://review-lry.github.io/tools/modules/hash-generator.js",
       "description": "SHA-256/SHA-512 哈希生成"
+    },
+    "password-generator": {
+      "name": "密码生成器",
+      "version": "1.0.0",
+      "url": "https://review-lry.github.io/tools/modules/password-generator.js",
+      "description": "安全随机密码生成"
     }
+  },
+  "settings": {
+    "checkInterval": 3600000,
+    "cacheExpiry": 86400000,
+    "enableNotifications": true
   }
 }

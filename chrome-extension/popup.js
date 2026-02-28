@@ -5,7 +5,103 @@ document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initQuickButtons();
     initTools();
+    initDynamicLoader();
 });
+
+// ===== 动态模块加载器 =====
+const DynamicLoader = {
+    cache: new Map(),
+    CONFIG_URL: 'https://review-lry.github.io/tools/modules/config.json',
+    
+    async init() {
+        // 从本地存储加载缓存
+        try {
+            const cached = localStorage.getItem('dev_toolbox_modules');
+            if (cached) {
+                const data = JSON.parse(cached);
+                Object.entries(data).forEach(([key, value]) => {
+                    this.cache.set(key, value);
+                });
+            }
+        } catch (e) {}
+        
+        // 后台检查更新
+        this.checkUpdates();
+    },
+    
+    async checkUpdates() {
+        try {
+            const response = await fetch(this.CONFIG_URL + '?t=' + Date.now());
+            const config = await response.json();
+            
+            // 显示更新消息
+            if (config.message) {
+                this.showNotification(config.message);
+            }
+            
+            // 检查模块更新
+            for (const [name, module] of Object.entries(config.modules || {})) {
+                const cached = this.cache.get(name);
+                if (!cached || cached.version !== module.version) {
+                    await this.loadModule(name, module);
+                }
+            }
+            
+            this.saveCache();
+        } catch (e) {
+            console.log('检查更新失败，使用缓存');
+        }
+    },
+    
+    async loadModule(name, module) {
+        try {
+            const response = await fetch(module.url);
+            const code = await response.text();
+            this.cache.set(name, {
+                ...module,
+                code,
+                loadedAt: Date.now()
+            });
+        } catch (e) {
+            console.error(`加载模块失败: ${name}`);
+        }
+    },
+    
+    getModule(name) {
+        return this.cache.get(name);
+    },
+    
+    saveCache() {
+        const data = {};
+        this.cache.forEach((value, key) => {
+            data[key] = value;
+        });
+        localStorage.setItem('dev_toolbox_modules', JSON.stringify(data));
+    },
+    
+    showNotification(msg) {
+        const toast = document.createElement('div');
+        toast.textContent = msg;
+        toast.style.cssText = `
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 99999;
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+};
+
+function initDynamicLoader() {
+    DynamicLoader.init();
+}
 
 // ===== 时间更新 =====
 function updateTime() {
