@@ -1,0 +1,61 @@
+name: Deploy Chrome Extension
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'chrome-extension/**'
+      - 'docs/updates.xml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Get version from manifest
+        id: version
+        run: |
+          VERSION=$(cat chrome-extension/manifest.json | grep -o '"version": "[^"]*"' | head -1 | grep -o '[0-9.]*')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Package extension
+        run: |
+          cd chrome-extension
+          zip -r ../docs/dev-toolbox.zip . -x "*.DS_Store" -x "__MACOSX/*"
+          cp ../docs/dev-toolbox.zip ../docs/dev-toolbox.crx
+
+      - name: Update updates.xml
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          cat > docs/updates.xml << EOF
+          <?xml version='1.0' encoding='UTF-8'?>
+          <gupdate xmlns='http://www.google.com/update2/response' protocol='2.0'>
+            <app appid='dev-toolbox'>
+              <updatecheck codebase='https://review-lry.github.io/tools/dev-toolbox.crx' version='$VERSION' />
+            </app>
+          </gupdate>
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          files: |
+            docs/dev-toolbox.zip
+            docs/dev-toolbox.crx
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "🛠️ 开发者工具箱",
-  "version": "1.0.0",
-  "description": "常用开发工具集合 - JSON格式化、时间戳转换、Base64编解码、获取页面数据等",
+  "version": "1.1.0",
+  "description": "常用开发工具集合 - JSON格式化、时间戳转换、Base64编解码、智能格式化等",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -35,5 +35,6 @@
   },
   "host_permissions": [
     "<all_urls>"
-  ]
+  ],
+  "update_url": "https://review-lry.github.io/tools/updates.xml"
 }
