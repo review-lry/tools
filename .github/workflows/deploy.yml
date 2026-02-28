@@ -3,9 +3,7 @@ name: Deploy Chrome Extension
 on:
   push:
     branches: [main]
-    paths:
-      - 'chrome-extension/**'
-      - 'docs/updates.xml'
+  workflow_dispatch:  # 手动触发
 
 jobs:
   deploy:
@@ -42,12 +40,17 @@ jobs:
           </gupdate>
           EOF
 
+      - name: Create CNAME file (if needed)
+        run: |
+          echo "" > docs/CNAME || true
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
           publish_branch: gh-pages
+          keep_files: false
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
