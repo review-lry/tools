@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; width: 1280px; height: 800px; background: #f5f7fa; overflow: hidden; position: relative; }
+    .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 12px 20px; }
+    .header h1 { font-size: 16px; font-weight: 600; }
+    
+    .quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; background: white; }
+    .quick-btn { padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; text-align: center; background: #f8f9fa; }
+    .quick-btn .icon { font-size: 24px; display: block; margin-bottom: 5px; }
+    .quick-btn .text { font-size: 11px; color: #333; }
+    
+    .main { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
+    
+    .card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .card h3 { font-size: 13px; color: #1e3c72; margin-bottom: 10px; }
+    
+    .input-box { background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; padding: 10px; font-family: Monaco, Consolas, monospace; font-size: 11px; min-height: 60px; margin-bottom: 10px; color: #333; }
+    
+    .btn { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 10px; display: inline-block; margin-right: 5px; }
+    .btn-secondary { background: #6c757d; }
+    .btn-success { background: #28a745; }
+    
+    .output { background: #1e1e1e; color: #d4d4d4; border-radius: 4px; padding: 10px; font-family: Monaco, Consolas, monospace; font-size: 10px; min-height: 100px; }
+    .output-light { background: #f8f9fa; border: 1px solid #ddd; color: #333; }
+    
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; }
+    .feature { background: white; border-radius: 8px; padding: 12px; border: 1px solid #e0e0e0; }
+    .feature h4 { font-size: 12px; color: #1e3c72; margin-bottom: 5px; }
+    .feature p { font-size: 10px; color: #666; }
+    
+    .footer { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 10px; text-align: center; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🛠️ 开发者工具箱</h1>
+  </div>
+  
+  <div class="quick">
+    <div class="quick-btn"><span class="icon">✨</span><span class="text">智能格式化</span></div>
+    <div class="quick-btn"><span class="icon">📋</span><span class="text">复制选中</span></div>
+    <div class="quick-btn"><span class="icon">🕐</span><span class="text">当前时间戳</span></div>
+    <div class="quick-btn"><span class="icon">🆔</span><span class="text">生成UUID</span></div>
+  </div>
+  
+  <div class="main">
+    <div class="card">
+      <h3>📝 JSON 格式化</h3>
+      <div class="input-box">{"name":"test","age":25,"items":[1,2,3]}</div>
+      <span class="btn">格式化</span>
+      <span class="btn btn-secondary">压缩</span>
+      <span class="btn btn-success">复制</span>
+      <div class="output" style="margin-top:10px;">{
+  "name": "test",
+  "age": 25,
+  "items": [1, 2, 3]
+}</div>
+    </div>
+    
+    <div class="card">
+      <h3>🎫 JWT 解析</h3>
+      <div class="input-box">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ</div>
+      <span class="btn">解析</span>
+      <div class="output output-light" style="margin-top:10px;"><strong>Header:</strong><br>{ "alg": "HS256", "typ": "JWT" }<br><br><strong>Payload:</strong><br>{ "sub": "1234567890", "name": "John Doe" }<br><br><span style="color:#28a745;">✅ 有效期至: 2026-03-01 12:00:00</span></div>
+    </div>
+  </div>
+  
+  <div class="features">
+    <div class="feature"><h4>⏰ 时间工具</h4><p>时间戳转换、日期计算</p></div>
+    <div class="feature"><h4>🔐 编解码</h4><p>Base64、URL、HTML</p></div>
+    <div class="feature"><h4>📝 格式化</h4><p>JSON、JWT、智能识别</p></div>
+    <div class="feature"><h4>📄 文本</h4><p>统计、大小写、去重</p></div>
+    <div class="feature"><h4>🎲 生成器</h4><p>UUID、密码、二维码</p></div>
+    <div class="feature"><h4>🔒 安全</h4><p>SHA-256、SHA-512</p></div>
+  </div>
+  
+  <div class="footer">
+    按 Ctrl+Shift+D 快速打开 | 所有数据本地处理，保护隐私
+  </div>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开发者工具箱</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; width: 480px; min-height: 600px; background: #f5f7fa; }
+        .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 12px 15px; }
+        .header h1 { font-size: 15px; font-weight: 600; }
+        .header p { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+        .tabs { display: flex; flex-wrap: wrap; gap: 3px; padding: 6px; background: white; border-bottom: 1px solid #e0e0e0; }
+        .tab { padding: 4px 8px; border: none; background: #f0f0f0; border-radius: 4px; cursor: pointer; font-size: 10px; transition: all 0.2s; }
+        .tab:hover { background: #e0e0e0; }
+        .tab.active { background: #1e3c72; color: white; }
+        .content { padding: 8px; display: none; max-height: 500px; overflow-y: auto; }
+        .content.active { display: block; }
+        .card { background: white; border-radius: 8px; padding: 10px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .card h3 { font-size: 11px; color: #1e3c72; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+        .input-group { margin-bottom: 6px; }
+        .input-group label { display: block; font-size: 9px; color: #666; margin-bottom: 2px; }
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 5px 7px; border: 1px solid #ddd; border-radius: 4px; font-size: 10px; font-family: Monaco, Consolas, monospace; }
+        .input-group textarea { min-height: 40px; resize: vertical; }
+        .btn { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; margin-right: 3px; margin-bottom: 3px; }
+        .btn:hover { opacity: 0.9; }
+        .btn-secondary { background: #6c757d; }
+        .btn-success { background: #28a745; }
+        .btn-warning { background: #fd7e14; }
+        .btn-danger { background: #dc3545; }
+        .btn-info { background: #17a2b8; }
+        .btn-sm { padding: 3px 6px; font-size: 8px; }
+        .result { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 4px; padding: 6px; margin-top: 5px; font-size: 9px; max-height: 120px; overflow-y: auto; font-family: Monaco, Consolas, monospace; word-break: break-all; }
+        .result-lg { max-height: 180px; }
+        .result .error { color: #dc3545; }
+        .row { display: flex; gap: 5px; }
+        .col { flex: 1; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 5px; font-size: 9px; margin: 4px 0; }
+        .checkbox-group label { display: flex; align-items: center; gap: 2px; cursor: pointer; }
+        .quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 6px; background: white; margin-bottom: 6px; }
+        .quick-btn { padding: 6px; border: 1px solid #e0e0e0; background: #f8f9fa; border-radius: 6px; cursor: pointer; font-size: 9px; text-align: center; transition: all 0.2s; line-height: 1.2; }
+        .quick-btn:hover { background: #e9ecef; border-color: #1e3c72; }
+        .quick-btn .icon { font-size: 14px; display: block; }
+        .time-display { font-size: 16px; font-weight: bold; color: ##1e3c72; text-align: center; padding: 6px 0; }
+        .time-display small { font-size: 9px; color: #666; font-weight: normal; display: block; margin-top: 2px; }
+        .footer { padding: 6px; text-align: center; font-size: 8px; color: #999; background: white; border-top: 1px solid #e0e0e0; }
+        .qr-container { text-align: center; padding: 8px; }
+        .qr-container img { max-width: 100%; border-radius: 8px; }
+        .color-preview { width: 24px; height: 24px; border-radius: 4px; border: 1px solid #ddd; display: inline-block; vertical-align: middle; margin-left: 8px; }
+        .badge { display: inline-block; padding: 1px 4px; border-radius: 8px; font-size: 7px; margin-left: 5px; }
+        .badge-new { background: #28a745; color: white; }
+        .badge-fix { background: #fd7e14; color: white; }
+        .hint { font-size: 8px; color: #999; margin-top: 2px; }
+        .inline-flex { display: flex; align-items: center; gap: 5px; }
+        .copy-icon { cursor: pointer; opacity: 0.6; transition: opacity 0.2s; }
+        .copy-icon:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛠️ 开发者工具箱</h1>
+        <p>JSON/时间戳/Base64/二维码等开发工具</p>
+    </div>
+
+    <div class="quick">
+        <div class="quick-btn" id="btn-format"><span class="icon">✨</span>格式化</div>
+        <div class="quick-btn" id="btn-copy"><span class="icon">📋</span>复制</div>
+        <div class="quick-btn" id="btn-timestamp"><span class="icon">🕐</span>时间戳</div>
+        <div class="quick-btn" id="btn-uuid"><span class="icon">🆔</span>UUID</div>
+        <div class="quick-btn" id="btn-current-qr"><span class="icon">📱</span>当前页<span class="badge badge-fix">FIX</span></div>
+        <div class="quick-btn" id="btn-short-url"><span class="icon">🔗</span>短链接<span class="badge badge-fix">FIX</span></div>
+        <div class="quick-btn" id="btn-json-path"><span class="icon">🔍</span>JSONPath<span class="badge badge-fix">FIX</span></div>
+        <div class="quick-btn" id="btn-diff"><span class="icon">📊</span>对比<span class="badge badge-fix">FIX</span></div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="time">🕐时间</button>
+        <button class="tab" data-tab="encode">🔐编码</button>
+        <button class="tab" data-tab="json">📝JSON</button>
+        <button class="tab" data-tab="text">📄文本</button>
+        <button class="tab" data-tab="gen">🎲生成</button>
+        <button class="tab" data-tab="qr">📱二维码</button>
+        <button class="tab" data-tab="net">🌐网络</button>
+        <button class="tab" data-tab="conv">🔄转换</button>
+        <button class="tab" data-tab="hash">🔒哈希</button>
+    </div>
+
+    <div id="tab-time" class="content active">
+        <div class="card">
+            <h3>⏰ 当前时间</h3>
+            <div class="time-display" id="nowTime">-<small>时间戳: -</small></div>
+        </div>
+        <div class="card">
+            <h3>📊 时间戳转换</h3>
+            <div class="input-group"><input type="text" id="tsIn" placeholder="输入时间戳（秒/毫秒）"></div>
+            <button class="btn" id="btn-ts-convert">转换</button>
+            <button class="btn btn-secondary" id="btn-ts-now">当前</button>
+            <button class="btn btn-success" id="btn-ts-copy">复制</button>
+            <div class="result" id="tsOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📅 日期转时间戳</h3>
+            <div class="input-group"><input type="text" id="dateIn" placeholder="2024-01-01 12:00:00"></div>
+            <button class="btn" id="btn-date-convert">转换</button>
+            <div class="result" id="dateOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>⏱️ 时间差计算<span class="badge badge-fix">FIXED</span></h3>
+            <div class="row">
+                <div class="col"><input type="datetime-local" id="timeStart"></div>
+                <div class="col"><input type="datetime-local" id="timeEnd"></div>
+            </div>
+            <button class="btn" id="btn-time-diff">计算</button>
+            <div class="result" id="timeDiffOut">结果</div>
+        </div>
+    </div>
+
+    <div id="tab-encode" class="content">
+        <div class="card">
+            <h3>🔐 Base64</h3>
+            <div class="input-group"><textarea id="b64In" placeholder="输入文本"></textarea></div>
+            <button class="btn" id="btn-b64-enc">编码</button>
+            <button class="btn btn-secondary" id="btn-b64-dec">解码</button>
+            <button class="btn btn-success" id="btn-b64-copy">复制</button>
+            <div class="result" id="b64Out">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔗 URL</h3>
+            <div class="input-group"><textarea id="urlIn" placeholder="输入URL"></textarea></div>
+            <button class="btn" id="btn-url-enc">编码</button>
+            <button class="btn btn-secondary" id="btn-url-dec">解码</button>
+            <div class="result" id="urlOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🌐 HTML转义</h3>
+            <div class="input-group"><textarea id="htmlIn" placeholder="输入HTML"></textarea></div>
+            <button class="btn" id="btn-html-enc">转义</button>
+            <button class="btn btn-secondary" id="btn-html-dec">反转义</button>
+            <div class="result" id="htmlOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔢 进制转换</h3>
+            <div class="input-group"><input type="text" id="numIn" placeholder="输入数字"></div>
+            <div class="row">
+                <div class="col"><select id="numFrom"><option value="10">十进制</option><option value="2">二进制</option><option value="8">八进制</option><option value="16">十六进制</option></select></div>
+                <div class="col"><select id="numTo"><option value="2">二进制</option><option value="8">八进制</option><option value="10">十进制</option><option value="16">十六进制</option></select></div>
+            </div>
+            <button class="btn" id="btn-num-conv">转换</button>
+            <div class="result" id="numOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔤 Unicode<span class="badge badge-fix">FIXED</span></h3>
+            <div class="input-group"><textarea id="unicodeIn" placeholder="输入文本或 \\uXXXX"></textarea></div>
+            <button class="btn" id="btn-unicode-enc">编码</button>
+            <button class="btn btn-secondary" id="btn-unicode-dec">解码</button>
+            <div class="result" id="unicodeOut">结果</div>
+        </div>
+    </div>
+
+    <div id="tab-json" class="content">
+        <div class="card">
+            <h3>📝 JSON格式化</h3>
+            <div class="input-group"><textarea id="jsonIn" placeholder='{"name":"test"}' style="min-height:50px;"></textarea></div>
+            <button class="btn" id="btn-json-fmt">格式化</button>
+            <button class="btn btn-secondary" id="btn-json-min">压缩</button>
+            <button class="btn btn-success" id="btn-json-copy">复制</button>
+            <button class="btn btn-warning" id="btn-json-validate">校验</button>
+            <div class="result" id="jsonOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🎫 JWT解析</h3>
+            <div class="input-group"><textarea id="jwtIn" placeholder="粘贴JWT Token"></textarea></div>
+            <button class="btn" id="btn-jwt">解析</button>
+            <div class="result result-lg" id="jwtOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔍 JSONPath查询<span class="badge badge-fix">FIXED</span></h3>
+            <p class="hint">示例: $.store.book[0].title</p>
+            <div class="input-group"><textarea id="jsonPathData" placeholder='{"store":{"book":[{"title":"A"},{"title":"B"}]}}' style="min-height:35px;"></textarea></div>
+            <div class="input-group"><input type="text" id="jsonPathExpr" placeholder="$.store.book[*].title"></div>
+            <button class="btn" id="btn-json-path-query">查询</button>
+            <div class="result" id="jsonPathOut">结果</div>
+        </div>
+    </div>
+
+    <div id="tab-text" class="content">
+        <div class="card">
+            <h3>📊 文本统计</h3>
+            <div class="input-group"><textarea id="statIn" placeholder="输入文本"></textarea></div>
+            <button class="btn" id="btn-stat">统计</button>
+            <div class="result" id="statOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔠 大小写</h3>
+            <div class="input-group"><textarea id="caseIn" placeholder="输入文本"></textarea></div>
+            <button class="btn" id="btn-upper">大写</button>
+            <button class="btn btn-secondary" id="btn-lower">小写</button>
+            <button class="btn btn-warning" id="btn-cap">首字母</button>
+            <button class="btn btn-secondary" id="btn-camel">驼峰</button>
+            <button class="btn btn-secondary" id="btn-snake">蛇形</button>
+            <div class="result" id="caseOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📋 排序去重</h3>
+            <div class="input-group"><textarea id="sortIn" placeholder="每行一个"></textarea></div>
+            <button class="btn" id="btn-sort">排序</button>
+            <button class="btn btn-secondary" id="btn-uniq">去重</button>
+            <button class="btn btn-warning" id="btn-reverse">倒序</button>
+            <button class="btn btn-secondary" id="btn-shuffle">随机</button>
+            <div class="result" id="sortOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔍 正则测试</h3>
+            <div class="input-group"><input type="text" id="regexPattern" placeholder="正则表达式"></div>
+            <div class="input-group"><textarea id="regexText" placeholder="测试文本"></textarea></div>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="regexG"> g</label>
+                <label><input type="checkbox" id="regexI"> i</label>
+                <label><input type="checkbox" id="regexM"> m</label>
+            </div>
+            <button class="btn" id="btn-regex">测试</button>
+            <div class="result" id="regexOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📊 文本对比<span class="badge badge-fix">FIXED</span></h3>
+            <div class="row">
+                <div class="col"><textarea id="diffLeft" placeholder="文本A" style="min-height:50px;"></textarea></div>
+                <div class="col"><textarea id="diffRight" placeholder="文本B" style="min-height:50px;"></textarea></div>
+            </div>
+            <button class="btn" id="btn-diff">对比</button>
+            <div class="result result-lg" id="diffOut">结果</div>
+        </div>
+    </div>
+
+    <div id="tab-gen" class="content">
+        <div class="card">
+            <h3>🆔 UUID</h3>
+            <div class="row">
+                <div class="col"><input type="number" id="uuidN" value="1" min="1" max="10"></div>
+                <div class="col"><button class="btn" id="btn-uuid-gen">生成</button></div>
+            </div>
+            <div class="result" id="uuidOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔑 随机密码</h3>
+            <div class="input-group"><input type="number" id="pwdL" value="16" min="4" max="64"></div>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="c1" checked> 大写</label>
+                <label><input type="checkbox" id="c2" checked> 小写</label>
+                <label><input type="checkbox" id="c3" checked> 数字</label>
+                <label><input type="checkbox" id="c4" checked> 特殊</label>
+            </div>
+            <button class="btn" id="btn-pwd">生成</button>
+            <button class="btn btn-success" id="btn-pwd-copy">复制</button>
+            <div class="result" id="pwdOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📝 Lorem生成</h3>
+            <div class="row">
+                <div class="col"><input type="number" id="loremN" value="3" min="1" max="20"></div>
+                <div class="col"><select id="loremType"><option value="para">段落</option><option value="sent">句子</option><option value="word">单词</option></select></div>
+            </div>
+            <button class="btn" id="btn-lorem">生成</button>
+            <div class="result" id="loremOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📋 条形码生成<span class="badge badge-fix">FIXED</span></h3>
+            <div class="input-group"><input type="text" id="barcodeIn" placeholder="输入数字或文本"></div>
+            <div class="input-group"><select id="barcodeType"><option value="code128">Code 128</option><option value="ean13">EAN-13</option><option value="upc">UPC</option></select></div>
+            <button class="btn" id="btn-barcode">生成</button>
+            <div class="result qr-container" id="barcodeOut">结果</div>
+        </div>
+    </div>
+
+    <div id="tab-qr" class="content">
+        <div class="card">
+            <h3>📱 二维码生成</h3>
+            <div class="input-group"><textarea id="qrIn" placeholder="输入URL或文本"></textarea></div>
+            <div class="row">
+                <div class="col"><input type="number" id="qrSize" value="180" min="50" max="300" placeholder="尺寸"></div>
+                <div class="col"><select id="qrColor"><option value="000000">黑色</option><option value="1e3c72">蓝色</option><option value="28a745">绿色</option><option value="dc3545">红色</option></select></div>
+            </div>
+            <button class="btn" id="btn-qr">生成</button>
+            <button class="btn btn-success" id="btn-qr-download">下载</button>
+            <div class="result qr-container" id="qrOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔗 当前页面二维码<span class="badge badge-fix">FIXED</span></h3>
+            <p class="hint">一键生成当前浏览器标签页URL的二维码</p>
+            <button class="btn" id="btn-current-page-qr">生成当前页面二维码</button>
+            <div class="result qr-container" id="currentQrOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📷 二维码解析<span class="badge badge-fix">FIXED</span></h3>
+            <div class="input-group"><input type="text" id="qrDecodeIn" placeholder="输入二维码图片URL或粘贴图片"></div>
+            <p class="hint">支持: zxing.com, 在线二维码识别工具</p>
+            <button class="btn" id="btn-qr-decode">解析</button>
+            <div class="result" id="qrDecodeOut">结果</div>
+        </div>
+    </div>
+
+    <div id="tab-net" class="content">
+        <div class="card">
+            <h3>🔗 URL解析<span class="badge badge-fix">FIXED</span></h3>
+            <div class="input-group"><input type="text" id="urlParseIn" placeholder="输入完整URL"></div>
+            <button class="btn" id="btn-url-parse">解析</button>
+            <div class="result result-lg" id="urlParseOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🌍 IP地址查询<span class="badge badge-fix">FIXED</span></h3>
+            <div class="input-group"><input type="text" id="ipQueryIn" placeholder="输入IP地址（留空查本机IP）"></div>
+            <button class="btn" id="btn-ip-query">查询</button>
+            <button class="btn btn-secondary" id="btn-my-ip">我的IP</button>
+            <div class="result" id="ipQueryOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔎 User-Agent解析<span class="badge badge-fix">FIXED</span></h3>
+            <div class="input-group"><textarea id="uaIn" placeholder="粘贴User-Agent字符串"></textarea></div>
+            <button class="btn" id="btn-ua-parse">解析</button>
+            <button class="btn btn-secondary" id="btn-ua-current">当前UA</button>
+            <div class="result" id="uaOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📡 HTTP状态码<span class="badge badge-fix">FIXED</span></h3>
+            <div class="input-group"><input type="number" id="httpCodeIn" placeholder="输入HTTP状态码" min="100" max="599"></div>
+            <button class="btn" id="btn-http-code">查询</button>
+            <div class="result" id="httpCodeOut">结果</div>
+        </div>
+    </div>
+
+    <div id="tab-conv" class="content">
+        <div class="card">
+            <h3>🎨 颜色转换</h3>
+            <div class="input-group"><input type="text" id="colorIn" placeholder="#1e3c72 或 rgb(30,60,114)"></div>
+            <div class="inline-flex">
+                <button class="btn" id="btn-color">转换</button>
+                <span class="color-preview" id="colorPreview"></span>
+            </div>
+            <div class="result" id="colorOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📐 单位转换</h3>
+            <div class="row">
+                <div class="col"><input type="number" id="unitValue" placeholder="数值"></div>
+                <div class="col"><select id="unitFrom"><option value="px">px</option><option value="rem">rem</option><option value="em">em</option></select></div>
+                <div class="col"><select id="unitTo"><option value="rem">rem</option><option value="px">px</option><option value="em">em</option></select></div>
+            </div>
+            <div class="input-group" style="margin-top:4px;"><input type="number" id="baseSize" value="16" placeholder="基准字号(px)"></div>
+            <button class="btn" id="btn-unit">转换</button>
+            <div class="result" id="unitOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>📊 JSON ↔ CSV</h3>
+            <div class="input-group"><textarea id="jsonCsvIn" placeholder="JSON数组 或 CSV文本"></textarea></div>
+            <button class="btn" id="btn-json-csv">JSON→CSV</button>
+            <button class="btn btn-secondary" id="btn-csv-json">CSV→JSON</button>
+            <div class="result" id="jsonCsvOut">结果</div>
+        </div>
+        <div class="card">
+            <h3>🖼️ 图片Base64<span class="badge badge-fix">FIXED</span></h3>
+            <div class="input-group"><input type="file" id="imgFile" accept="image/*"></div>
+            <button class="btn" id="btn-img-base64">转为Base64</button>
+            <div class="result result-lg" id="imgBase64Out">结果</div>
+        </div>
+        <div class="card">
+            <h3>🔢 数字格式化<span class="badge badge-fix">FIXED</span></h3>
+            <div class="input-group"><input type="text" id="numFormatIn" placeholder="输入数字"></div>
+            <button class="btn" id="btn-num-format">格式化</button>
+            <button class="btn btn-secondary" id="btn-num-cn">转中文大写</button>
+            <div class="result" id="numFormatOut">结果</div>
+        </div>
+    </div>
+
+    <div id="tab-hash" class="content">
+        <div class="card">
+            <h3>🔒 哈希生成</h3>
+            <div class="input-group"><textarea id="hashIn" placeholder="输入文本"></textarea></div>
+            <div class="input-group"><select id="hashT"><option selected>SHA-256</option><option>SHA-512</option></select></div>
+            <button class="btn" id="btn-hash">生成</button>
+            <button class="btn btn-secondary" id="btn-hash-copy">复制</button>
+            <div class="result" id="hashOut">结果</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        🛠️ Dev Toolbox v1.4.1 | 按 Ctrl+Shift+D 快速打开
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>

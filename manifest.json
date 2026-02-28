@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "🛠️ 开发者工具箱",
+  "version": "1.4.1",
+  "description": "常用开发工具集合 - JSON格式化、时间戳转换、Base64编解码、智能格式化等。支持远程模块更新。",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "开发者工具箱 (Ctrl+Shift+D)"
+  },
+  "permissions": [
+    "activeTab",
+    "clipboardWrite",
+    "clipboardRead",
+    "storage",
+    "scripting"
+  ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+D",
+        "mac": "Command+Shift+D"
+      },
+      "description": "打开开发者工具箱"
+    }
+  },
+  "host_permissions": [
+    "<all_urls>",
+    "https://review-lry.github.io/*"
+  ],
+  "update_url": "https://review-lry.github.io/tools/updates.xml",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
