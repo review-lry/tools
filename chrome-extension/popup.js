@@ -91,7 +91,6 @@ function initQuickButtons() {
     document.getElementById('btn-format').addEventListener('click', async () => {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         chrome.scripting.executeScript({ target: { tabId: tab.id }, function: smartFormatPage });
-        showToast('✨ 页面格式化完成');
     });
 
     document.getElementById('btn-copy').addEventListener('click', async () => {
@@ -102,42 +101,29 @@ function initQuickButtons() {
         });
         if (result) {
             navigator.clipboard.writeText(result);
-            showToast('📋 已复制: ' + result.substring(0, 20) + '...');
+            showToast('已复制!');
         } else {
-            showToast('⚠️ 未选中内容');
+            showToast('未选中内容');
         }
     });
 
     document.getElementById('btn-timestamp').addEventListener('click', () => {
         const ts = Math.floor(Date.now() / 1000);
         navigator.clipboard.writeText(ts.toString());
-        showToast('🕐 已复制: ' + ts);
+        showToast('已复制: ' + ts);
     });
 
     document.getElementById('btn-uuid').addEventListener('click', () => {
         const uuid = generateUUID();
         navigator.clipboard.writeText(uuid);
-        showToast('🆔 已复制: ' + uuid.substring(0, 18) + '...');
-    });
-
-    // 当前页二维码
-    document.getElementById('btn-current-qr').addEventListener('click', async () => {
-        const size = 200;
-        showResult('currentQrOut', '生成中...');
-        try {
-            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(tab.url)}`;
-            showResult('currentQrOut', `<img src="${qrUrl}" style="max-width:${size}px;border-radius:8px;"><br><small style="font-size:9px;color:#666;margin-top:4px;display:block;">${tab.url}</small>`);
-            showToast('📱 二维码已生成');
-        } catch(e) {
-            showResult('currentQrOut', '<span class="error">⚠️ 获取页面失败，请确保在网页上使用此功能</span>');
-        }
+        showToast('已复制: ' + uuid);
     });
 }
 
 // ===== 智能格式化 =====
 function smartFormatPage() {
     const text = document.body.innerText.trim();
+    
     function detectType(content) {
         const t = content.trim();
         if ((t.startsWith('{') && t.endsWith('}')) || (t.startsWith('[') && t.endsWith(']'))) {
@@ -147,11 +133,13 @@ function smartFormatPage() {
         if (/^(SELECT|INSERT|UPDATE|DELETE|CREATE)/i.test(t)) return 'sql';
         return 'json';
     }
+    
     try {
         const type = detectType(text);
         let formatted;
         if (type === 'json') formatted = JSON.stringify(JSON.parse(text), null, 2);
         else formatted = text;
+        
         const escaped = formatted.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         document.body.innerHTML = `<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;font-family:Monaco,Consolas,monospace;font-size:13px;white-space:pre-wrap;word-break:break-all;min-height:100vh;margin:0;">${escaped}</pre>`;
     } catch (e) {
@@ -162,131 +150,9 @@ function smartFormatPage() {
 function showToast(msg) {
     const toast = document.createElement('div');
     toast.textContent = msg;
-    toast.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:4px;font-size:12px;z-index:99999;';
+    toast.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:4px;font-size:12px;z-index:9999;';
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 2000);
-}
-
-// ===== 工具函数 =====
-function getVal(id) { return document.getElementById(id).value; }
-function showResult(id, content) { document.getElementById(id).innerHTML = content; }
-
-function convertTimestamp() {
-    let ts = parseInt(getVal('tsIn'));
-    if (isNaN(ts)) return showResult('tsOut', '<span class="error">请输入时间戳</span>');
-    if (ts < 10000000000) ts *= 1000;
-    const d = new Date(ts);
-    showResult('tsOut', `${Math.floor(ts/1000)}\n本地: ${d.toLocaleString('zh-CN')}\nUTC: ${d.toISOString()}`);
-}
-
-function dateToTimestamp() {
-    const input = getVal('dateIn').trim();
-    if (!input) return showResult('dateOut', '<span class="error">请输入日期</span>');
-    const d = new Date(input.replace(/[年月]/g, '-').replace(/日/g, ' '));
-    if (isNaN(d.getTime())) return showResult('dateOut', '<span class="error">格式错误</span>');
-    showResult('dateOut', `秒: ${Math.floor(d.getTime()/1000)}\n毫秒: ${d.getTime()}`);
-}
-
-function calcTimeDiff() {
-    const startStr = getVal('timeStart');
-    const endStr = getVal('timeEnd');
-    if (!startStr || !endStr) return showResult('timeDiffOut', '<span class="error">请选择时间</span>');
-    const start = new Date(startStr);
-    const end = new Date(endStr);
-    const diff = end - start;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    showResult('timeDiffOut', `相差: ${days}天 ${hours}小时 ${minutes}分钟\n秒数: ${seconds}\n总毫秒: ${diff}`);
-}
-
-function generateUUID() {
-    const array = new Uint8Array(16);
-    crypto.getRandomValues(array);
-    array[6] = (array[6] & 0x0f) | 0x40;
-    array[8] = (array[8] & 0x3f) | 0x80;
-    const hex = Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
-    return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
-}
-
-function detectBrowser(ua) {
-    if (ua.includes('Chrome')) return 'Chrome';
-    if (ua.includes('Edg')) return 'Edge';
-    if (ua.includes('Firefox')) return 'Firefox';
-    if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
-    if (ua.includes('Opera')) return 'Opera';
-    return 'Unknown';
-}
-
-function detectOS(ua) {
-    if (ua.includes('Win')) return 'Windows';
-    if (ua.includes('Mac') && !ua.includes('like Mac')) return 'macOS';
-    if (ua.includes('Linux')) return 'Linux';
-    if (ua.includes('Android')) return 'Android';
-    if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
-    return 'Unknown';
-}
-
-function rgbToHsl(hex) {
-    const r = parseInt(hex.slice(1, 3), 16) / 255;
-    const g = parseInt(hex.slice(3, 5), 16) / 255;
-    const b = parseInt(hex.slice(5, 7), 16) / 255;
-    const max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h = 0, s = 0, l = (max + min) / 2;
-    if (max !== min) {
-        s = l > 0.5 ? (max - l) / (1 - l) : (l - min) / max;
-        if (r === max) h = (g - b) / (max - min) / 6;
-        else if (g === max) h = 2 + (b - r) / (max - min) / 6;
-        else h = 4 + (r - g) / (max - min) / 6;
-    }
-    return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
-}
-
-function evaluateJSONPath(obj, path) {
-    const parts = path.split('.');
-    let result = obj;
-    for (const part of parts) {
-        if (part.includes('[*]')) {
-            const key = part.split('[*]')[0];
-            const arr = result[key];
-            return arr.map(item => {
-                try { return JSON.stringify(item, null, 2); }
-                catch(e) { return item; }
-            });
-        } else if (part.includes('[')) {
-            const match = part.match(/(.*)\[(\d+)\]/);
-            if (match) {
-                const key = match[1];
-                const idx = parseInt(match[2]);
-                result = result[key][idx];
-            }
-        } else {
-            result = result[part];
-        }
-    }
-    return result;
-}
-
-function compareText(text1, text2) {
-    const lines1 = text1.split('\n');
-    const lines2 = text2.split('\n');
-    const maxLen = Math.max(lines1.length, lines2.length);
-    let result = '';
-    
-    for (let i = 0; i < maxLen; i++) {
-        const l1 = lines1[i] || '';
-        const l2 = lines2[i] || '';
-        
-        if (l1 === l2) {
-            result += `  ${l1}\n`;
-        } else {
-            if (l1) result += `- ${l1}\n`;
-            if (l2) result += `+ ${l2}\n`;
-        }
-    }
-    
-    return result || '无差异';
 }
 
 // ===== 工具初始化 =====
@@ -298,16 +164,10 @@ function initTools() {
         convertTimestamp();
     });
     document.getElementById('btn-ts-copy').addEventListener('click', () => {
-        const text = document.getElementById('tsOut').innerText;
-        if (text && text !== '结果' && !text.includes('错误')) {
-            navigator.clipboard.writeText(text.split('\n')[0]);
-            showToast('✅ 已复制');
-        } else {
-            showToast('⚠️ 先转换再复制');
-        }
+        navigator.clipboard.writeText(document.getElementById('tsOut').innerText.split('\n')[0]);
+        showToast('已复制!');
     });
     document.getElementById('btn-date-convert').addEventListener('click', dateToTimestamp);
-    document.getElementById('btn-time-diff').addEventListener('click', calcTimeDiff);
 
     // === Base64 ===
     document.getElementById('btn-b64-enc').addEventListener('click', () => {
@@ -325,13 +185,8 @@ function initTools() {
         } catch(e) { showResult('b64Out', '<span class="error">解码失败</span>'); }
     });
     document.getElementById('btn-b64-copy').addEventListener('click', () => {
-        const text = document.getElementById('b64Out').innerText;
-        if (text && !text.includes('错误')) {
-            navigator.clipboard.writeText(text);
-            showToast('✅ 已复制');
-        } else {
-            showToast('⚠️ 请先编码/解码');
-        }
+        navigator.clipboard.writeText(document.getElementById('b64Out').innerText);
+        showToast('已复制!');
     });
 
     // === URL ===
@@ -365,41 +220,19 @@ function initTools() {
         } catch(e) { showResult('numOut', '<span class="error">转换失败</span>'); }
     });
 
-    // === Unicode ===
-    document.getElementById('btn-unicode-enc').addEventListener('click', () => {
-        const text = getVal('unicodeIn');
-        const encoded = text.split('').map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join('');
-        showResult('unicodeOut', encoded);
-    });
-    document.getElementById('btn-unicode-dec').addEventListener('click', () => {
-        const text = getVal('unicodeIn');
-        const decoded = text.replace(/\\u[\d\w]{4}/g, m => String.fromCharCode(parseInt(m.slice(2), 16)));
-        showResult('unicodeOut', decoded);
-    });
-
     // === JSON ===
     document.getElementById('btn-json-fmt').addEventListener('click', () => {
-        try { showResult('jsonOut', JSON.stringify(JSON.parse(getVal('jsonIn')), null, 2)); }
-        catch(e) { showResult('jsonOut', '<span class="error">无效JSON</span>'); }
+        try {
+            showResult('jsonOut', JSON.stringify(JSON.parse(getVal('jsonIn')), null, 2));
+        } catch(e) { showResult('jsonOut', '<span class="error">无效JSON</span>'); }
     });
     document.getElementById('btn-json-min').addEventListener('click', () => {
-        try { showResult('jsonOut', JSON.stringify(JSON.parse(getVal('jsonIn'))); }
+        try { showResult('jsonOut', JSON.stringify(JSON.parse(getVal('jsonIn')))); }
         catch(e) { showResult('jsonOut', '<span class="error">无效JSON</span>'); }
     });
     document.getElementById('btn-json-copy').addEventListener('click', () => {
-        const text = document.getElementById('jsonOut').innerText;
-        if (text && !text.includes('错误')) {
-            navigator.clipboard.writeText(text);
-            showToast('✅ 已复制');
-        } else {
-            showToast('⚠️ 请先格式化');
-        }
-    });
-    document.getElementById('btn-json-validate').addEventListener('click', () => {
-        try {
-            JSON.parse(getVal('jsonIn'));
-            showResult('jsonOut', '✅ JSON 格式有效');
-        } catch(e) { showResult('jsonOut', '<span class="error">无效JSON: ' + e.message + '</span>'); }
+        navigator.clipboard.writeText(document.getElementById('jsonOut').innerText);
+        showToast('已复制!');
     });
 
     // === JWT ===
@@ -407,7 +240,7 @@ function initTools() {
         const token = getVal('jwtIn').trim();
         if (!token) return showResult('jwtOut', '<span class="error">请输入JWT</span>');
         const parts = token.split('.');
-        if (parts.length !== 3) return showResult('jwtOut', '<span class="error">无效JWT（需要3段）</span>');
+        if (parts.length !== 3) return showResult('jwtOut', '<span class="error">无效JWT</span>');
         try {
             const decode = s => JSON.parse(atob(s.replace(/-/g, '+').replace(/_/g, '/')));
             const header = decode(parts[0]);
@@ -419,16 +252,6 @@ function initTools() {
             }
             showResult('jwtOut', `Header:\n${JSON.stringify(header, null, 2)}\n\nPayload:\n${JSON.stringify(payload, null, 2)}${expire}`);
         } catch(e) { showResult('jwtOut', '<span class="error">解析失败</span>'); }
-    });
-
-    // === JSONPath ===
-    document.getElementById('btn-json-path-query').addEventListener('click', () => {
-        try {
-            const json = JSON.parse(getVal('jsonPathData'));
-            const expr = getVal('jsonPathExpr');
-            const result = evaluateJSONPath(json, expr);
-            showResult('jsonPathOut', JSON.stringify(result, null, 2));
-        } catch(e) { showResult('jsonPathOut', '<span class="error">查询失败</span>'); }
     });
 
     // === 文本统计 ===
@@ -445,10 +268,6 @@ function initTools() {
         const s = getVal('caseIn').toLowerCase().replace(/[-_\s]+(.)/g, (_, c) => c.toUpperCase());
         showResult('caseOut', s);
     });
-    document.getElementById('btn-snake').addEventListener('click', () => {
-        const s = getVal('caseIn').replace(/[A-Z]/g, l => '_' + l.toLowerCase()).substring(1);
-        showResult('caseOut', s);
-    });
 
     // === 排序去重 ===
     document.getElementById('btn-sort').addEventListener('click', () => {
@@ -463,14 +282,6 @@ function initTools() {
     document.getElementById('btn-reverse').addEventListener('click', () => {
         const lines = getVal('sortIn').split('\n');
         showResult('sortOut', lines.reverse().join('\n'));
-    });
-    document.getElementById('btn-shuffle').addEventListener('click', () => {
-        const lines = getVal('sortIn').split('\n').filter(l => l.trim());
-        for (let i = lines.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [lines[i], lines[j]] = [lines[j], lines[i]];
-        }
-        showResult('sortOut', lines.join('\n'));
     });
 
     // === 正则测试 ===
@@ -491,13 +302,6 @@ function initTools() {
                 showResult('regexOut', '无匹配');
             }
         } catch(e) { showResult('regexOut', '<span class="error">正则错误</span>'); }
-    });
-
-    // === 文本对比 ===
-    document.getElementById('btn-diff').addEventListener('click', () => {
-        const left = getVal('diffLeft');
-        const right = getVal('diffRight');
-        showResult('diffOut', compareText(left, right));
     });
 
     // === UUID ===
@@ -523,12 +327,26 @@ function initTools() {
         showResult('pwdOut', pwd);
     });
     document.getElementById('btn-pwd-copy').addEventListener('click', () => {
-        const pwd = document.getElementById('pwdOut').innerText;
-        if (pwd && !pwd.includes('结果') && !pwd.includes('错误')) {
-            navigator.clipboard.writeText(pwd);
-            showToast('✅ 已复制');
+        navigator.clipboard.writeText(document.getElementById('pwdOut').innerText);
+        showToast('已复制!');
+    });
+
+    // === 二维码 ===
+    document.getElementById('btn-qr').addEventListener('click', () => {
+        const content = getVal('qrIn').trim();
+        const size = parseInt(getVal('qrSize')) || 150;
+        if (!content) return showResult('qrOut', '<span class="error">请输入内容</span>');
+        document.getElementById('qrOut').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(content)}">`;
+    });
+    document.getElementById('btn-qr-download').addEventListener('click', () => {
+        const img = document.querySelector('#qrOut img');
+        if (img) {
+            const a = document.createElement('a');
+            a.href = img.src;
+            a.download = 'qrcode.png';
+            a.click();
         } else {
-            showToast('⚠️ 先生成密码');
+            showToast('请先生成二维码');
         }
     });
 
@@ -554,137 +372,11 @@ function initTools() {
         showResult('loremOut', result.trim());
     });
 
-    // === 条形码 ===
-    document.getElementById('btn-barcode').addEventListener('click', () => {
-        const content = getVal('barcodeIn').trim();
-        if (!content) return showResult('barcodeOut', '<span class="error">请输入内容</span>');
-        const type = getVal('barcodeType');
-        const url = `https://barcodeapi.org/api/barcode/${type}?data=${encodeURIComponent(content)}`;
-        document.getElementById('barcodeOut').innerHTML = `<img src="${url}" style="max-width:100%;height:60px;">`;
-    });
-
-    // === 二维码 ===
-    document.getElementById('btn-qr').addEventListener('click', () => {
-        const content = getVal('qrIn').trim();
-        const size = parseInt(getVal('qrSize')) || 180;
-        const color = getVal('qrColor');
-        if (!content) return showResult('qrOut', '<span class="error">请输入内容</span>');
-        const url = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&color=${color}&bgcolor=ffffff&data=${encodeURIComponent(content)}`;
-        document.getElementById('qrOut').innerHTML = `<img src="${url}" style="max-width:${size}px;border-radius:8px;">`;
-    });
-    document.getElementById('btn-qr-download').addEventListener('click', () => {
-        const img = document.querySelector('#qrOut img');
-        if (img) {
-            const a = document.createElement('a');
-            a.href = img.src;
-            a.download = 'qrcode.png';
-            a.click();
-        } else {
-            showToast('⚠️ 请先生成二维码');
-        }
-    });
-
-    // === 当前页面二维码 ===
-    document.getElementById('btn-current-page-qr').addEventListener('click', async () => {
-        const size = 200;
-        showResult('currentQrOut', '生成中...');
-        try {
-            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(tab.url)}`;
-            showResult('currentQrOut', `<img src="${qrUrl}" style="max-width:${size}px;border-radius:8px;"><br><small style="font-size:9px;color:#666;margin-top:4px;display:block;">${tab.url}</small>`);
-            showToast('📱 当前页面二维码已生成');
-        } catch(e) {
-            showResult('currentQrOut', '<span class="error">获取页面失败，请确保在网页上使用此功能</span>');
-        }
-    });
-
-    // === 二维码解析 ===
-    document.getElementById('btn-qr-decode').addEventListener('click', () => {
-        const input = getVal('qrDecodeIn').trim();
-        if (!input) return showResult('qrDecodeOut', '<span class="error">请输入内容</span>');
-        if (input.startsWith('http')) {
-            showResult('qrDecodeOut', '检测到URL，请访问二维码解析工具：\n\n推荐:\n1. https://zxing.com/\n2. https://onlinebarcodereader.com/');
-        } else {
-            showResult('qrDecodeOut', '请使用专用二维码识别工具\n\n推荐:\n1. zxing.com\n2. https://onlinebarcodereader.com/');
-        }
-    });
-
-    // === URL解析 ===
-    document.getElementById('btn-url-parse').addEventListener('click', () => {
-        const url = getVal('urlParseIn').trim();
-        if (!url) return showResult('urlParseOut', '<span class="error">请输入URL</span>');
-        try {
-            const parsed = new URL(url);
-            const params = {};
-            for (const [key, val] of parsed.searchParams.entries()) params[key] = val;
-            showResult('urlParseOut', `协议: ${parsed.protocol}\n主机: ${parsed.hostname}\n端口: ${parsed.port || '默认'}\n路径: ${parsed.pathname}\n查询参数: ${Object.keys(params).length} 个\n${JSON.stringify(params, null, 2)}`);
-        } catch(e) { showResult('urlParseOut', '<span class="error">无效URL</span>'); }
-    });
-
-    // === IP查询 ===
-    document.getElementById('btn-ip-query').addEventListener('click', async () => {
-        const ip = getVal('ipQueryIn').trim();
-        if (!ip) return showResult('ipQueryOut', '<span class="error">请输入IP</span>');
-        try {
-            showResult('ipQueryOut', '查询中...');
-            const resp = await fetch(`http://ip-api.com/json/${ip}`);
-            const data = await resp.json();
-            if (data.status === 'fail') throw new Error(data.message);
-            showResult('ipQueryOut', `国家: ${data.country || '-'} ${data.countryCode || ''}\n地区: ${data.regionName || '-'}\n城市: ${data.city || '-'}\nISP: ${data.isp || '-'}\n时区: ${data.timezone || '-'}\nIP: ${data.query || '-'}`);
-        } catch(e) { showResult('ipQueryOut', '<span class="error">查询失败: ' + e.message + '</span>'); }
-    });
-    document.getElementById('btn-my-ip').addEventListener('click', async () => {
-        try {
-            showResult('ipQueryOut', '查询中...');
-            const resp = await fetch('http://ip-api.com/json/');
-            const data = await resp.json();
-            if (data.status === 'fail') throw new Error(data.message);
-            showResult('ipQueryOut', `我的IP: ${data.query || '-'}\n国家: ${data.country || '-'}\n地区: ${data.regionName || '-'}\nISP: ${data.isp || '-'}`);
-        } catch(e) { showResult('ipQueryOut', '<span class="error">查询失败: ' + e.message + '</span>'); }
-    });
-
-    // === User-Agent解析 ===
-    document.getElementById('btn-ua-parse').addEventListener('click', () => {
-        const ua = getVal('uaIn');
-        if (!ua) return showResult('uaOut', '<span class="error">请输入User-Agent</span>');
-        const browser = detectBrowser(ua);
-        const os = detectOS(ua);
-        showResult('uaOut', `浏览器: ${browser}\n操作系统: ${os}\n原始: ${ua.substring(0, 100)}...`);
-    });
-    document.getElementById('btn-ua-current').addEventListener('click', () => {
-        const ua = navigator.userAgent;
-        showResult('uaIn', ua);
-        const browser = detectBrowser(ua);
-        const os = detectOS(ua);
-        showResult('uaOut', `浏览器: ${browser}\n操作系统: ${os}\n完整: ${ua}`);
-    });
-
-    // === HTTP状态码 ===
-    document.getElementById('btn-http-code').addEventListener('click', () => {
-        const code = getVal('httpCodeIn');
-        if (!code) return showResult('httpCodeOut', '<span class="error">请输入状态码</span>');
-        const codes = {
-            200: 'OK - 请求成功',
-            201: 'Created - 已创建',
-            204: 'No Content - 无内容',
-            301: 'Moved Permanently - 永久重定向',
-            302: 'Found - 临时重定向',
-            304: 'Not Modified - 未修改',
-            400: 'Bad Request - 请求错误',
-            401: 'Unauthorized - 未授权',
-            403: 'Forbidden - 禁止访问',
-            404: 'Not Found - 未找到',
-            500: 'Internal Server Error - 服务器错误',
-            502: 'Bad Gateway - 网关错误',
-            503: 'Service Unavailable - 服务不可用'
-        };
-        showResult('httpCodeOut', codes[code] || '❓ 未知状态码');
-    });
-
     // === 颜色转换 ===
     document.getElementById('btn-color').addEventListener('click', () => {
         const input = getVal('colorIn').trim();
-        let hex = '', rgb = '';
+        let hex = '', rgb = '', hsl = '';
+        
         if (input.startsWith('#')) {
             hex = input;
             const r = parseInt(input.slice(1, 3), 16);
@@ -701,7 +393,12 @@ function initTools() {
                 document.getElementById('colorPreview').style.background = hex;
             }
         }
-        if (hex || rgb) showResult('colorOut', `HEX: ${hex}\nRGB: ${rgb}\nHSL: ${rgbToHsl(hex)}`);
+        
+        if (hex || rgb) {
+            showResult('colorOut', `HEX: ${hex}\nRGB: ${rgb}`);
+        } else {
+            showResult('colorOut', '<span class="error">格式错误</span>');
+        }
     });
 
     // === 单位转换 ===
@@ -710,12 +407,18 @@ function initTools() {
         const from = getVal('unitFrom');
         const to = getVal('unitTo');
         const base = parseFloat(getVal('baseSize')) || 16;
+        
         if (isNaN(value)) return showResult('unitOut', '<span class="error">请输入数值</span>');
-        let px = from === 'px' ? value : value * base;
+        
+        let px;
+        if (from === 'px') px = value;
+        else if (from === 'rem' || from === 'em') px = value * base;
+        
         let result;
         if (to === 'px') result = px + 'px';
         else if (to === 'rem') result = (px / base).toFixed(4) + 'rem';
         else if (to === 'em') result = (px / base).toFixed(4) + 'em';
+        
         showResult('unitOut', result);
     });
 
@@ -726,7 +429,9 @@ function initTools() {
             if (!Array.isArray(json) || json.length === 0) throw new Error();
             const keys = Object.keys(json[0]);
             let csv = keys.join(',') + '\n';
-            json.forEach(row => csv += keys.map(k => JSON.stringify(row[k] || '')).join(',') + '\n');
+            json.forEach(row => {
+                csv += keys.map(k => JSON.stringify(row[k] || '')).join(',') + '\n';
+            });
             showResult('jsonCsvOut', csv);
         } catch(e) { showResult('jsonCsvOut', '<span class="error">无效JSON数组</span>'); }
     });
@@ -745,37 +450,6 @@ function initTools() {
         } catch(e) { showResult('jsonCsvOut', '<span class="error">无效CSV</span>'); }
     });
 
-    // === 图片Base64 ===
-    document.getElementById('btn-img-base64').addEventListener('click', () => {
-        const file = document.getElementById('imgFile').files[0];
-        if (!file) return showResult('imgBase64Out', '<span class="error">请选择图片</span>');
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const base64 = e.target.result;
-            const size = file.size || 0;
-            const mime = file.type || 'unknown';
-            showResult('imgBase64Out', `data:${mime};base64,${base64.substring(0, 50)}...\n\n大小: ${size} bytes\n类型: ${mime}\n\n✅ 已生成Base64，点击复制按钮可复制完整内容`);
-            window.currentBase64 = base64;
-        };
-        reader.readAsDataURL(file);
-    });
-
-    // === 数字格式化 ===
-    document.getElementById('btn-num-format').addEventListener('click', () => {
-        const num = getVal('numFormatIn').trim();
-        if (!num) return showResult('numFormatOut', '<span class="error">请输入数字</span>');
-        const parsed = parseFloat(num.replace(/,/g, ''));
-        showResult('numFormatOut', `原始: ${num}\n格式化: ${parsed.toLocaleString('zh-CN')}`);
-    });
-    document.getElementById('btn-num-cn').addEventListener('click', () => {
-        const num = getVal('numFormatIn').trim();
-        const parsed = parseFloat(num.replace(/,/g, ''));
-        if (isNaN(parsed)) return showResult('numFormatOut', '<span class="error">无效数字</span>');
-        const digits = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
-        const units = ['', '十', '百', '千', '万', '亿'];
-        showResult('numFormatOut', `${parsed.toLocaleString('zh-CN')}\n中文: ${num}`);
-    });
-
     // === 哈希 ===
     document.getElementById('btn-hash').addEventListener('click', async () => {
         const input = getVal('hashIn');
@@ -787,12 +461,234 @@ function initTools() {
         showResult('hashOut', hex);
     });
     document.getElementById('btn-hash-copy').addEventListener('click', () => {
-        const text = document.getElementById('hashOut').innerText;
-        if (text && !text.includes('错误') && !text.includes('请输入')) {
-            navigator.clipboard.writeText(text);
-            showToast('✅ 已复制');
-        } else {
-            showToast('⚠️ 先生成哈希');
-        }
+        navigator.clipboard.writeText(document.getElementById('hashOut').innerText);
+        showToast('已复制!');
     });
 }
+
+// ===== 工具函数 =====
+function getVal(id) { return document.getElementById(id).value; }
+function showResult(id, content) { document.getElementById(id).innerHTML = content; }
+
+function convertTimestamp() {
+    let ts = parseInt(getVal('tsIn'));
+    if (isNaN(ts)) return showResult('tsOut', '<span class="error">请输入时间戳</span>');
+    if (ts < 10000000000) ts *= 1000;
+    const d = new Date(ts);
+    showResult('tsOut', `${Math.floor(ts/1000)}\n本地: ${d.toLocaleString('zh-CN')}\nUTC: ${d.toISOString()}`);
+}
+
+function dateToTimestamp() {
+    const input = getVal('dateIn').trim();
+    if (!input) return showResult('dateOut', '<span class="error">请输入日期</span>');
+    const d = new Date(input.replace(/[年月]/g, '-').replace(/日/g, ' '));
+    if (isNaN(d.getTime())) return showResult('dateOut', '<span class="error">格式错误</span>');
+    showResult('dateOut', `秒: ${Math.floor(d.getTime()/1000)}\n毫秒: ${d.getTime()}`);
+}
+
+function generateUUID() {
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    array[6] = (array[6] & 0x0f) | 0x40;
+    array[8] = (array[8] & 0x3f) | 0x80;
+    const hex = Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
+    return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
+}
+// ===== 补充缺失的函数 =====
+
+function detectBrowser(ua) {
+    if (ua.includes('Chrome')) return 'Chrome';
+    if (ua.includes('Firefox')) return 'Firefox';
+    if (ua.includes('Edg')) return 'Edge';
+    if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+    if (ua.includes('Opera')) return 'Opera';
+    return 'Unknown';
+}
+
+function detectOS(ua) {
+    if (ua.includes('Win')) return 'Windows';
+    if (ua.includes('Mac')) return 'macOS';
+    if (ua.includes('Linux')) return 'Linux';
+    if (ua.includes('Android')) return 'Android';
+    if (ua.includes('iOS')) return 'iOS';
+    return 'Unknown';
+}
+
+function rgbToHsl(hex) {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s = 0, l = (max + min) / 2;
+    if (max !== min) {
+        s = l > 0.5 ? (max - l) / (1 - l) : (l - min) / max;
+        if (r === max) h = (g - b) / (max - min) / 6;
+        else if (g === max) h = 2 + (b - r) / (max - min) / 6;
+        else h = 4 + (r - g) / (max - min) / 6;
+    }
+    return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+}
+
+function calcTimeDiff() {
+    const startStr = getVal('timeStart');
+    const endStr = getVal('timeEnd');
+    if (!startStr || !endStr) return showResult('timeDiffOut', '<span class="error">请选择时间</span>');
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    const diff = end - start;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    showResult('timeDiffOut', `相差: ${days}天 ${hours}小时 ${minutes}分钟\n秒: ${seconds}\n总毫秒: ${diff}`);
+}
+
+
+// ===== 网络工具事件监听器 =====
+// 添加到 initTools() 函数末尾
+const addNetworkToolListeners = () => {
+    // 当前页二维码
+    if (document.getElementById('btn-current-page-qr')) {
+        document.getElementById('btn-current-page-qr').addEventListener('click', async () => {
+            const size = 200;
+            showResult('currentQrOut', '生成中...');
+            try {
+                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(tab.url)}`;
+                showResult('currentQrOut', `<img src="${qrUrl}" style="max-width:${size}px;border-radius:8px;"><br><small style="font-size:9px;color:#666;margin-top:4px;display:block;">${tab.url}</small>`);
+                showToast('📱 当前页面二维码已生成');
+            } catch(e) {
+                showResult('currentQrOut', '<span class="error">获取页面失败，请确保在网页上使用此功能</span>');
+            }
+        });
+    }
+
+    // URL解析
+    if (document.getElementById('btn-url-parse')) {
+        document.getElementById('btn-url-parse').addEventListener('click', () => {
+            const url = getVal('urlParseIn').trim();
+            if (!url) return showResult('urlParseOut', '<span class="error">请输入URL</span>');
+            try {
+                const parsed = new URL(url);
+                const params = {};
+                for (const [key, val] of parsed.searchParams.entries()) params[key] = val;
+                showResult('urlParseOut', `协议: ${parsed.protocol}\n主机: ${parsed.hostname}\n端口: ${parsed.port || '默认'}\n路径: ${parsed.pathname}\n查询参数: ${Object.keys(params).length} 个\n${JSON.stringify(params, null, 2)}`);
+            } catch(e) { showResult('urlParseOut', '<span class="error">无效URL</span>'); }
+        });
+    }
+
+    // IP查询
+    if (document.getElementById('btn-ip-query')) {
+        document.getElementById('btn-ip-query').addEventListener('click', async () => {
+            const ip = getVal('ipQueryIn').trim();
+            if (!ip) return showResult('ipQueryOut', '<span class="error">请输入IP</span>');
+            try {
+                showResult('ipQueryOut', '查询中...');
+                const resp = await fetch(`http://ip-api.com/json/${ip}`);
+                const data = await resp.json();
+                if (data.status === 'fail') throw new Error(data.message);
+                showResult('ipQueryOut', `国家: ${data.country || '-'} ${data.countryCode || ''}\n地区: ${data.regionName || '-'}\n城市: ${data.city || '-'}\nISP: ${data.isp || '-'}\n时区: ${data.timezone || '-'}\nIP: ${data.query || '-'}`);
+            } catch(e) { showResult('ipQueryOut', '<span class="error">查询失败: ' + e.message + '</span>'); }
+        });
+    }
+
+    // 我的IP
+    if (document.getElementById('btn-my-ip')) {
+        document.getElementById('btn-my-ip').addEventListener('click', async () => {
+            try {
+                showResult('ipQueryOut', '查询中...');
+                const resp = await fetch('http://ip-api.com/json/');
+                const data = await resp.json();
+                if (data.status === 'fail') throw new Error(data.message);
+                showResult('ipQueryOut', `我的IP: ${data.query || '-'}\n国家: ${data.country || '-'}\n地区: ${data.regionName || '-'}\nISP: ${data.isp || '-'}`);
+            } catch(e) { showResult('ipQueryOut', '<span class="error">查询失败: ' + e.message + '</span>'); }
+        });
+    }
+
+    // User-Agent解析
+    if (document.getElementById('btn-ua-parse')) {
+        document.getElementById('btn-ua-parse').addEventListener('click', () => {
+            const ua = getVal('uaIn');
+            if (!ua) return showResult('uaOut', '<span class="error">请输入User-Agent</span>');
+            const browser = detectBrowser(ua);
+            const os = detectOS(ua);
+            showResult('uaOut', `浏览器: ${browser}\n操作系统: ${os}\n原始: ${ua.substring(0, 100)}...`);
+        });
+    }
+
+    // 当前UA
+    if (document.getElementById('btn-ua-current')) {
+        document.getElementById('btn-ua-current').addEventListener('click', () => {
+            const ua = navigator.userAgent;
+            showResult('uaIn', ua);
+            const browser = detectBrowser(ua);
+            const os = detectOS(ua);
+            showResult('uaOut', `浏览器: ${browser}\n操作系统: ${os}\n完整: ${ua}`);
+        });
+    }
+
+    // HTTP状态码
+    if (document.getElementById('btn-http-code')) {
+        document.getElementById('btn-http-code').addEventListener('click', () => {
+            const code = getVal('httpCodeIn');
+            if (!code) return showResult('httpCodeOut', '<span class="error">请输入状态码</span>');
+            const codes = {
+                200: 'OK - 请求成功',
+                201: 'Created - 已创建',
+                204: 'No Content - 无内容',
+                301: 'Moved Permanently - 永久重定向',
+                302: 'Found - 临时重定向',
+                304: 'Not Modified - 未修改',
+                400: 'Bad Request - 请求错误',
+                401: 'Unauthorized - 未授权',
+                403: 'Forbidden - 禁止访问',
+                404: 'Not Found - 未找到',
+                500: 'Internal Server Error - 服务器错误',
+                502: 'Bad Gateway - 网关错误',
+                503: 'Service Unavailable - 服务不可用'
+            };
+            showResult('httpCodeOut', codes[code] || '❓ 未知状态码');
+        });
+    }
+
+    // 图片Base64
+    if (document.getElementById('btn-img-base64')) {
+        document.getElementById('btn-img-base64').addEventListener('click', () => {
+            const file = document.getElementById('imgFile').files[0];
+            if (!file) return showResult('imgBase64Out', '<span class="error">请选择图片</span>');
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64 = e.target.result;
+                const size = file.size || 0;
+                const mime = file.type || 'unknown';
+                showResult('imgBase64Out', `data:${mime};base64,${base64.substring(0, 50)}...\n\n大小: ${size} bytes\n类型: ${mime}\n\n✅ 已生成Base64`);
+                window.currentBase64 = base64;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // 数字格式化
+    if (document.getElementById('btn-num-format')) {
+        document.getElementById('btn-num-format').addEventListener('click', () => {
+            const num = getVal('numFormatIn').trim();
+            if (!num) return showResult('numFormatOut', '<span class="error">请输入数字</span>');
+            const parsed = parseFloat(num.replace(/,/g, ''));
+            showResult('numFormatOut', `原始: ${num}\n格式化: ${parsed.toLocaleString('zh-CN')}`);
+        });
+    }
+
+    if (document.getElementById('btn-num-cn')) {
+        document.getElementById('btn-num-cn').addEventListener('click', () => {
+            const num = getVal('numFormatIn').trim();
+            const parsed = parseFloat(num.replace(/,/g, ''));
+            if (isNaN(parsed)) return showResult('numFormatOut', '<span class="error">无效数字</span>');
+            showResult('numFormatOut', `${parsed.toLocaleString('zh-CN')}\n说明: 数字格式化完成`);
+        });
+    }
+};
+
+// 在 DOMContentLoaded 时调用
+document.addEventListener('DOMContentLoaded', () => {
+    addNetworkToolListeners();
+});
