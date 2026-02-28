@@ -46,6 +46,7 @@
         .footer { padding: 6px; text-align: center; font-size: 8px; color: #999; background: white; border-top: 1px solid #e0e0e0; }
         .qr-container { text-align: center; padding: 8px; }
         .qr-container img { max-width: 100%; border-radius: 8px; }
+        .qr-result { max-height: 220px !important; }
         .color-preview { width: 24px; height: 24px; border-radius: 4px; border: 1px solid #ddd; display: inline-block; vertical-align: middle; margin-left: 8px; }
         .badge { display: inline-block; padding: 1px 4px; border-radius: 8px; font-size: 7px; margin-left: 5px; }
         .badge-new { background: #28a745; color: white; }
@@ -67,10 +68,7 @@
         <div class="quick-btn" id="btn-copy"><span class="icon">📋</span>复制</div>
         <div class="quick-btn" id="btn-timestamp"><span class="icon">🕐</span>时间戳</div>
         <div class="quick-btn" id="btn-uuid"><span class="icon">🆔</span>UUID</div>
-        <div class="quick-btn" id="btn-current-qr"><span class="icon">📱</span>当前页<span class="badge badge-fix">FIX</span></div>
-        <div class="quick-btn" id="btn-short-url"><span class="icon">🔗</span>短链接<span class="badge badge-fix">FIX</span></div>
-        <div class="quick-btn" id="btn-json-path"><span class="icon">🔍</span>JSONPath<span class="badge badge-fix">FIX</span></div>
-        <div class="quick-btn" id="btn-diff"><span class="icon">📊</span>对比<span class="badge badge-fix">FIX</span></div>
+        <div class="quick-btn" id="btn-current-qr"><span class="icon">📱</span>当前页</div>
     </div>
 
     <div class="tabs">
@@ -268,7 +266,7 @@
             <div class="input-group"><input type="text" id="barcodeIn" placeholder="输入数字或文本"></div>
             <div class="input-group"><select id="barcodeType"><option value="code128">Code 128</option><option value="ean13">EAN-13</option><option value="upc">UPC</option></select></div>
             <button class="btn" id="btn-barcode">生成</button>
-            <div class="result qr-container" id="barcodeOut">结果</div>
+            <div class="result qr-result qr-container" id="barcodeOut">结果</div>
         </div>
     </div>
 
@@ -282,13 +280,13 @@
             </div>
             <button class="btn" id="btn-qr">生成</button>
             <button class="btn btn-success" id="btn-qr-download">下载</button>
-            <div class="result qr-container" id="qrOut">结果</div>
+            <div class="result qr-result qr-container" id="qrOut">结果</div>
         </div>
         <div class="card">
             <h3>🔗 当前页面二维码<span class="badge badge-fix">FIXED</span></h3>
             <p class="hint">一键生成当前浏览器标签页URL的二维码</p>
             <button class="btn" id="btn-current-page-qr">生成当前页面二维码</button>
-            <div class="result qr-container" id="currentQrOut">结果</div>
+            <div class="result qr-result qr-container" id="currentQrOut">结果</div>
         </div>
         <div class="card">
             <h3>📷 二维码解析<span class="badge badge-fix">FIXED</span></h3>
