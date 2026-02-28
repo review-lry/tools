@@ -118,6 +118,19 @@ function initQuickButtons() {
         navigator.clipboard.writeText(uuid);
         showToast('已复制: ' + uuid);
     });
+
+    document.getElementById('btn-current-qr').addEventListener('click', async () => {
+        const size = 200;
+        showResult('currentQrOut', '生成中...');
+        try {
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(tab.url)}`;
+            showResult('currentQrOut', `<img src="${qrUrl}" style="max-width:${size}px;border-radius:8px;"><br><small style="font-size:9px;color:#666;margin-top:4px;display:block;">${tab.url}</small>`);
+            showToast('📱 当前页面二维码已生成');
+        } catch(e) {
+            showResult('currentQrOut', '<span class="error">获取页面失败，请确保在网页上使用此功能</span>');
+        }
+    });
 }
 
 // ===== 智能格式化 =====
